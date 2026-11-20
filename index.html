@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FreshMart - Retail Store Management System (RSMS)</title>
+  
+  <!-- Modern Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  
+  <!-- Custom Application Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ================= LOGIN SCREEN ================= -->
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="brand-icon"><i class="fas fa-store-alt"></i></div>
+        <h1>FreshMart RSMS</h1>
+        <p>Retail Store Management System</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="loginUsername">Username</label>
+        <input type="text" id="loginUsername" class="form-control" placeholder="Enter username" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" class="form-control" placeholder="Enter password" autocomplete="current-password">
+      </div>
+      <div id="loginError" class="login-error" style="display:none;"></div>
+      <button class="btn btn-primary btn-full" onclick="handleLogin()">
+        <i class="fas fa-right-to-bracket"></i> Sign In
+      </button>
+      <div class="login-demo">
+        <strong>Demo accounts</strong>
+        <table>
+          <tr><td>admin</td><td>admin123</td><td>Administrator</td></tr>
+          <tr><td>manager</td><td>manager123</td><td>Store Manager</td></tr>
+          <tr><td>cashier</td><td>cashier123</td><td>Cashier</td></tr>
+          <tr><td>stock</td><td>stock123</td><td>Stock Clerk</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-container">
+    
+    <!-- ================= SIDEBAR NAVIGATION ================= -->
+    <aside class="sidebar">
+      <div class="brand-section">
+        <div class="brand-icon">
+          <i class="fas fa-store-alt"></i>
+        </div>
+        <div>
+          <div class="brand-title">FreshMart RSMS</div>
+          <div class="brand-subtitle">Retail Management</div>
+        </div>
+      </div>
+
+      <ul class="nav-menu">
+        <div class="nav-section-title">Core Operations</div>
+        
+        <li class="nav-item">
+          <a class="nav-link active" data-view="dashboard">
+            <i class="fas fa-chart-pie"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" data-view="pos">
+            <i class="fas fa-cash-register"></i>
+            <span>POS Billing</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" data-view="sales">
+            <i class="fas fa-receipt"></i>
+            <span>Sales History</span>
+          </a>
+        </li>
+
+        <div class="nav-section-title">Inventory & Stock</div>
+
+        <li class="nav-item">
+          <a class="nav-link" data-view="products">
+            <i class="fas fa-boxes"></i>
+            <span>Products & Catalog</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" data-view="categories">
+            <i class="fas fa-tags"></i>
+            <span>Categories</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" data-view="inventory">
+            <i class="fas fa-warehouse"></i>
+            <span>Stock Alerts</span>
+            <span class="nav-badge" id="sideNavAlertBadge" style="display: none;">0</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" data-view="purchases">
+            <i class="fas fa-truck-loading"></i>
+            <span>Stock In / Purchases</span>
+          </a>
+        </li>
+
+        <div class="nav-section-title">People & Partners</div>
+
+        <li class="nav-item">
+          <a class="nav-link" data-view="customers">
+            <i class="fas fa-users"></i>
+            <span>Customers</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" data-view="suppliers">
+            <i class="fas fa-truck"></i>
+            <span>Suppliers</span>
+          </a>
+        </li>
+
+        <div class="nav-section-title">Management & Admin</div>
+
+        <li class="nav-item">
+          <a class="nav-link" data-view="reports">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span>Reports & Analytics</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" data-view="activity">
+            <i class="fas fa-clock-rotate-left"></i>
+            <span>Activity Log</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" data-view="users">
+            <i class="fas fa-user-shield"></i>
+            <span>User Accounts</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" data-view="settings">
+            <i class="fas fa-cog"></i>
+            <span>Settings & Backup</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- Sidebar User Footer -->
+      <div class="sidebar-footer">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div id="userNameDisplay" style="font-size: 13px; font-weight: 700; color: #f8fafc;">System Admin</div>
+            <span id="userRoleBadge" class="role-badge-pill role-badge-admin">Administrator</span>
+          </div>
+          <div class="user-avatar" id="userAvatarDisplay">AD</div>
+        </div>
+        <div class="sidebar-footer-actions">
+          <button class="footer-btn" onclick="openChangePasswordModal()" title="Change password"><i class="fas fa-key"></i> Password</button>
+          <button class="footer-btn" onclick="logout()" title="Sign out"><i class="fas fa-right-from-bracket"></i> Logout</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ================= MAIN WRAPPER ================= -->
+    <div class="main-wrapper">
+      
+      <!-- Top Sticky Header -->
+      <header class="top-header">
+        <div class="header-left">
+          <h1 class="page-title" id="currentPageTitle">
+            <i class="fas fa-chart-pie text-primary"></i> Store Dashboard
+          </h1>
+        </div>
+
+        <div class="header-right">
+          <!-- Live Date Clock -->
+          <div class="header-time" id="liveClock">
+            <i class="far fa-clock"></i> Loading clock...
+          </div>
+
+          <!-- Low Stock / Expiry Notification Button -->
+          <button class="notification-btn" onclick="navigateTo('inventory')" title="Low Stock & Expiry Alerts">
+            <i class="fas fa-bell"></i>
+            <span class="badge-dot" id="alertCountBadge" style="display: none;"></span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Body Container (Views Switch Dynamically) -->
+      <main class="content-body">
+        
+        <!-- View 1: Dashboard -->
+        <section class="page-view active" id="view-dashboard"></section>
+
+        <!-- View 2: Sales & POS Billing -->
+        <section class="page-view" id="view-pos"></section>
+
+        <!-- View 3: Products Catalog -->
+        <section class="page-view" id="view-products"></section>
+
+        <!-- View 4: Inventory & Stock Alerts -->
+        <section class="page-view" id="view-inventory"></section>
+
+        <!-- View 5: Stock In & Purchases -->
+        <section class="page-view" id="view-purchases"></section>
+
+        <!-- View 6: Customers -->
+        <section class="page-view" id="view-customers"></section>
+
+        <!-- View 7: Suppliers -->
+        <section class="page-view" id="view-suppliers"></section>
+
+        <!-- View 8: Reports & Analytics -->
+        <section class="page-view" id="view-reports"></section>
+
+        <!-- View 9: System Users -->
+        <section class="page-view" id="view-users"></section>
+
+        <!-- View 10: Settings & Backup -->
+        <section class="page-view" id="view-settings"></section>
+
+        <!-- View 11: Sales History -->
+        <section class="page-view" id="view-sales"></section>
+
+        <!-- View 12: Categories -->
+        <section class="page-view" id="view-categories"></section>
+
+        <!-- View 13: Activity Log -->
+        <section class="page-view" id="view-activity"></section>
+
+      </main>
+
+    </div>
+
+  </div>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- 1. Product Add/Edit Modal (TC03) -->
+  <div class="modal-overlay" id="productFormModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="productFormModalTitle"><i class="fas fa-plus-circle text-primary"></i> Add New Product</h3>
+        <button class="modal-close-btn" onclick="closeModal('productFormModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="productFormId">
+        
+        <div class="form-group">
+          <label class="form-label">Product Name *</label>
+          <input type="text" id="productFormName" class="form-control" placeholder="e.g. Basmati Rice (5 kg)">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Category *</label>
+            <select id="productFormCategory" class="form-control"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Barcode / UPC</label>
+            <input type="text" id="productFormBarcode" class="form-control" placeholder="890123456789">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Selling Price (₹) *</label>
+            <input type="number" id="productFormPrice" class="form-control" step="0.5" placeholder="0.00">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cost Price (₹)</label>
+            <input type="number" id="productFormCostPrice" class="form-control" step="0.5" placeholder="Wholesale cost">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Initial Stock Quantity *</label>
+            <input type="number" id="productFormStock" class="form-control" min="0" value="25">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Minimum Alert Level (Reorder Threshold) *</label>
+            <input type="number" id="productFormMinLevel" class="form-control" min="1" value="10">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Expiry Date</label>
+            <input type="date" id="productFormExpiry" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Product Image URL</label>
+            <input type="url" id="productFormImage" class="form-control" placeholder="https://images.unsplash.com/...">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('productFormModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveProductForm()">
+          <i class="fas fa-save"></i> Save Product
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Receive Stock from Supplier Modal -->
+  <div class="modal-overlay" id="receiveStockModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i class="fas fa-truck-loading text-success"></i> Receive Stock from Supplier</h3>
+        <button class="modal-close-btn" onclick="closeModal('receiveStockModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Select Supplier *</label>
+          <select id="receiveSupplierSelect" class="form-control"></select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Select Product Received *</label>
+          <select id="receiveProductSelect" class="form-control"></select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Quantity Received *</label>
+            <input type="number" id="receiveQuantity" class="form-control" min="1" value="20">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cost Price Per Unit (₹) *</label>
+            <input type="number" id="receiveCostPrice" class="form-control" step="0.5">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Supplier Invoice / Challan No</label>
+            <input type="text" id="receiveInvoiceNo" class="form-control" placeholder="INV-XXXX">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notes / Batch Remarks</label>
+            <input type="text" id="receiveNotes" class="form-control" placeholder="Fresh batch received">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Payment to Supplier</label>
+          <select id="receivePaymentStatus" class="form-control">
+            <option value="Paid">Paid now</option>
+            <option value="Pending">Pending (pay later)</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('receiveStockModal')">Cancel</button>
+        <button class="btn btn-success" onclick="processReceiveStockSubmit()">
+          <i class="fas fa-check"></i> Confirm & Increase Stock
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Customer Add Modal -->
+  <div class="modal-overlay" id="customerModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="customerModalTitle"><i class="fas fa-user-plus text-primary"></i> Add Customer</h3>
+        <button class="modal-close-btn" onclick="closeModal('customerModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="customerFormId">
+        <div class="form-group">
+          <label class="form-label">Customer Name *</label>
+          <input type="text" id="customerFormName" class="form-control" placeholder="e.g. Ramesh Kumar">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Phone Number *</label>
+            <input type="tel" id="customerFormPhone" class="form-control" placeholder="9876543210">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" id="customerFormEmail" class="form-control" placeholder="customer@mail.com">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Address</label>
+          <textarea id="customerFormAddress" class="form-control" rows="2" placeholder="Customer address..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('customerModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveCustomerForm()">
+          <i class="fas fa-save"></i> Save Customer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Supplier Add Modal -->
+  <div class="modal-overlay" id="supplierModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="supplierModalTitle"><i class="fas fa-truck text-primary"></i> Add New Supplier</h3>
+        <button class="modal-close-btn" onclick="closeModal('supplierModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="supplierFormId">
+        <div class="form-group">
+          <label class="form-label">Company / Supplier Name *</label>
+          <input type="text" id="supplierFormName" class="form-control" placeholder="e.g. Metro Wholesale Ltd">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Contact Person</label>
+            <input type="text" id="supplierFormContact" class="form-control" placeholder="Rajesh Gupta">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number *</label>
+            <input type="tel" id="supplierFormPhone" class="form-control" placeholder="9811223344">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input type="email" id="supplierFormEmail" class="form-control" placeholder="supplier@trade.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Address</label>
+          <textarea id="supplierFormAddress" class="form-control" rows="2" placeholder="Warehouse location / address"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('supplierModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveSupplierForm()">
+          <i class="fas fa-save"></i> Save Supplier
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. User Add Modal (Admin RBAC) -->
+  <div class="modal-overlay" id="userModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i class="fas fa-user-shield text-danger"></i> Create System User Account</h3>
+        <button class="modal-close-btn" onclick="closeModal('userModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Full Name *</label>
+          <input type="text" id="userFormName" class="form-control" placeholder="e.g. Rahul Verma">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Username *</label>
+            <input type="text" id="userFormUsername" class="form-control" placeholder="rahul">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password *</label>
+            <input type="password" id="userFormPassword" class="form-control" placeholder="••••••••">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Assigned Role *</label>
+          <select id="userFormRole" class="form-control">
+            <option value="cashier">Cashier (POS Billing & Receipts)</option>
+            <option value="stock_clerk">Stock Clerk (Inventory & Receiving)</option>
+            <option value="manager">Store Manager (Reports, Pricing, Staff)</option>
+            <option value="admin">Administrator (Full Access & Backup)</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('userModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveUserForm()">
+          <i class="fas fa-check"></i> Create User
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Payment Modal (Cash, Card, UPI QR) -->
+  <div class="modal-overlay" id="paymentModal">
+    <div class="modal-box" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3><i class="fas fa-wallet text-success"></i> Take Payment & Complete Sale</h3>
+        <button class="modal-close-btn" onclick="closeModal('paymentModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="text-align: center; margin-bottom: 16px;">
+          <div style="font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase;">Payable Total</div>
+          <div id="payTotalAmountDisplay" style="font-size: 32px; font-weight: 800; color: #2563eb;">₹0.00</div>
+        </div>
+
+        <!-- Payment Method Tabs -->
+        <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+          <button class="btn btn-secondary btn-full pay-tab-btn active" data-mode="Cash" onclick="setPaymentMode('Cash')">
+            <i class="fas fa-money-bill-wave"></i> Cash
+          </button>
+          <button class="btn btn-secondary btn-full pay-tab-btn" data-mode="Card" onclick="setPaymentMode('Card')">
+            <i class="fas fa-credit-card"></i> Card
+          </button>
+          <button class="btn btn-secondary btn-full pay-tab-btn" data-mode="UPI" onclick="setPaymentMode('UPI')">
+            <i class="fas fa-qrcode"></i> UPI
+          </button>
+        </div>
+
+        <!-- Cash Tab -->
+        <div id="payModeCashTab">
+          <div class="form-group">
+            <label class="form-label">Cash Tendered by Customer (₹)</label>
+            <input type="number" id="cashTenderedInput" class="form-control" step="1" oninput="calculateCashChange()">
+          </div>
+          <div style="background: #f1f5f9; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 13px; font-weight: 600;">Change to Return:</span>
+            <span id="cashChangeDisplay" style="font-size: 18px; font-weight: 800; color: #10b981;">₹0.00</span>
+          </div>
+        </div>
+
+        <!-- Card Tab -->
+        <div id="payModeCardTab" style="display: none;">
+          <div class="form-group">
+            <label class="form-label">Card Machine Approval / Reference No</label>
+            <input type="text" class="form-control" placeholder="e.g. TXN-894129">
+          </div>
+          <div style="font-size: 12px; color: #64748b; text-align: center;">
+            Swipe / Tap customer credit or debit card on the POS machine terminal.
+          </div>
+        </div>
+
+        <!-- UPI Tab -->
+        <div id="payModeUpiTab" style="display: none; text-align: center;">
+          <div id="upiQrCodeContainer" style="margin-bottom: 10px;"></div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('paymentModal')">Back</button>
+        <button class="btn btn-success" onclick="completeSaleTransaction()">
+          <i class="fas fa-check-circle"></i> Confirm Payment & Print Bill
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Thermal Receipt Modal (Conforms to Report Section 5.1 Sample Bill) -->
+  <div class="modal-overlay" id="receiptModal">
+    <div class="modal-box" style="max-width: 420px;">
+      <div class="modal-header no-print">
+        <h3><i class="fas fa-receipt text-primary"></i> Customer Bill Receipt</h3>
+        <button class="modal-close-btn" onclick="closeModal('receiptModal')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 10px;">
+        <div id="thermalReceiptContainer"></div>
+      </div>
+      <div class="modal-footer no-print">
+        <button class="btn btn-secondary" onclick="closeModal('receiptModal')">Close</button>
+        <button class="btn btn-primary" onclick="printReceipt()">
+          <i class="fas fa-print"></i> Print Receipt (Ctrl+P)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Category Modal -->
+  <div class="modal-overlay" id="categoryModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="categoryModalTitle"><i class="fas fa-tags text-primary"></i> Add Category</h3>
+        <button class="modal-close-btn" onclick="closeModal('categoryModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="categoryFormId">
+        <div class="form-group">
+          <label class="form-label">Category Name *</label>
+          <input type="text" id="categoryFormName" class="form-control" placeholder="e.g. Frozen Foods">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <input type="text" id="categoryFormDesc" class="form-control" placeholder="What goes in this category">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Icon</label>
+            <select id="categoryFormIcon" class="form-control">
+              <option value="fa-box">Box</option>
+              <option value="fa-seedling">Grains</option>
+              <option value="fa-cheese">Dairy</option>
+              <option value="fa-cookie-bite">Snacks</option>
+              <option value="fa-mug-hot">Drinks</option>
+              <option value="fa-bread-slice">Bakery</option>
+              <option value="fa-pump-soap">Personal care</option>
+              <option value="fa-spray-can">Cleaning</option>
+              <option value="fa-snowflake">Frozen</option>
+              <option value="fa-apple-whole">Fruit</option>
+              <option value="fa-carrot">Vegetables</option>
+              <option value="fa-drumstick-bite">Meat</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Colour</label>
+            <input type="color" id="categoryFormColor" class="form-control" value="#2563eb" style="height: 40px; padding: 4px;">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('categoryModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveCategoryForm()"><i class="fas fa-save"></i> Save Category</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. Stock Adjustment Modal (damaged / expired / wasted goods) -->
+  <div class="modal-overlay" id="adjustStockModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i class="fas fa-triangle-exclamation text-warning"></i> Stock Adjustment</h3>
+        <button class="modal-close-btn" onclick="closeModal('adjustStockModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="adjustProductId">
+        <div class="form-group">
+          <label class="form-label">Product</label>
+          <div id="adjustProductName" style="font-weight: 700;"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Units to remove *</label>
+            <input type="number" id="adjustQuantity" class="form-control" min="1" value="1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Reason *</label>
+            <select id="adjustReason" class="form-control">
+              <option>Damaged</option>
+              <option>Expired</option>
+              <option>Wasted</option>
+              <option>Lost / Missing</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Note</label>
+          <input type="text" id="adjustNote" class="form-control" placeholder="Optional details">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('adjustStockModal')">Cancel</button>
+        <button class="btn btn-danger" onclick="saveStockAdjustment()"><i class="fas fa-minus-circle"></i> Remove from Stock</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. Change Password Modal -->
+  <div class="modal-overlay" id="passwordModal">
+    <div class="modal-box" style="max-width: 420px;">
+      <div class="modal-header">
+        <h3><i class="fas fa-key text-primary"></i> Change My Password</h3>
+        <button class="modal-close-btn" onclick="closeModal('passwordModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Current Password</label>
+          <input type="password" id="pwOld" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">New Password (min 6 characters)</label>
+          <input type="password" id="pwNew" class="form-control">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm New Password</label>
+          <input type="password" id="pwConfirm" class="form-control">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('passwordModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveNewPassword()"><i class="fas fa-save"></i> Update Password</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11. Customer Purchase History Modal -->
+  <div class="modal-overlay" id="historyModal">
+    <div class="modal-box" style="max-width: 640px;">
+      <div class="modal-header">
+        <h3 id="historyModalTitle"><i class="fas fa-history text-primary"></i> Purchase History</h3>
+        <button class="modal-close-btn" onclick="closeModal('historyModal')">&times;</button>
+      </div>
+      <div class="modal-body" id="historyModalBody"></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('historyModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Database & Application Scripts -->
+  <script src="database.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
