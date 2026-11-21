@@ -38,6 +38,25 @@
       <button class="btn btn-primary btn-full" onclick="handleLogin()">
         <i class="fas fa-right-to-bracket"></i> Sign In
       </button>
+      <div class="login-switch">
+        New staff member? <a href="#" onclick="toggleRegisterForm(true); return false;">Request an account</a>
+      </div>
+
+      <div id="registerBox" style="display:none;">
+        <hr style="border:none; border-top:1px solid #e2e8f0; margin: 14px 0;">
+        <div style="font-weight:700; margin-bottom:8px;">Request a staff account</div>
+        <div class="form-group"><input type="text" id="regName" class="form-control" placeholder="Full name"></div>
+        <div class="form-group"><input type="text" id="regUsername" class="form-control" placeholder="Choose a username" autocomplete="off"></div>
+        <div class="form-group"><input type="password" id="regPassword" class="form-control" placeholder="Password (min 6 characters)" autocomplete="new-password"></div>
+        <div class="form-group"><input type="password" id="regConfirm" class="form-control" placeholder="Confirm password" autocomplete="new-password"></div>
+        <div id="registerMsg" class="login-error" style="display:none;"></div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-secondary" onclick="toggleRegisterForm(false)">Cancel</button>
+          <button class="btn btn-primary btn-full" onclick="handleRegister()"><i class="fas fa-user-plus"></i> Send Request</button>
+        </div>
+        <div style="font-size:11px; color:#64748b; margin-top:8px;">An Administrator must approve your account before you can sign in.</div>
+      </div>
+
       <div class="login-demo">
         <strong>Demo accounts</strong>
         <table>
@@ -51,9 +70,10 @@
   </div>
 
   <div class="app-container">
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar(false)"></div>
     
     <!-- ================= SIDEBAR NAVIGATION ================= -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
       <div class="brand-section">
         <div class="brand-icon">
           <i class="fas fa-store-alt"></i>
@@ -113,9 +133,30 @@
         </li>
 
         <li class="nav-item">
+          <a class="nav-link" data-view="stockcount">
+            <i class="fas fa-clipboard-check"></i>
+            <span>Stock Count Check</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" data-view="stockreports">
+            <i class="fas fa-file-lines"></i>
+            <span>Stock & Expiry Reports</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
           <a class="nav-link" data-view="purchases">
             <i class="fas fa-truck-loading"></i>
             <span>Stock In / Purchases</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" data-view="orders">
+            <i class="fas fa-file-invoice"></i>
+            <span>Purchase Orders</span>
           </a>
         </li>
 
@@ -188,6 +229,7 @@
       <!-- Top Sticky Header -->
       <header class="top-header">
         <div class="header-left">
+          <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()" aria-label="Open menu"><i class="fas fa-bars"></i></button>
           <h1 class="page-title" id="currentPageTitle">
             <i class="fas fa-chart-pie text-primary"></i> Store Dashboard
           </h1>
@@ -248,6 +290,15 @@
 
         <!-- View 13: Activity Log -->
         <section class="page-view" id="view-activity"></section>
+
+        <!-- View 14: Stock Count Check -->
+        <section class="page-view" id="view-stockcount"></section>
+
+        <!-- View 15: Stock & Expiry Reports -->
+        <section class="page-view" id="view-stockreports"></section>
+
+        <!-- View 16: Purchase Orders -->
+        <section class="page-view" id="view-orders"></section>
 
       </main>
 
@@ -525,6 +576,9 @@
           <button class="btn btn-secondary btn-full pay-tab-btn" data-mode="UPI" onclick="setPaymentMode('UPI')">
             <i class="fas fa-qrcode"></i> UPI
           </button>
+          <button class="btn btn-secondary btn-full pay-tab-btn" data-mode="Credit" onclick="setPaymentMode('Credit')">
+            <i class="fas fa-hand-holding-dollar"></i> Credit
+          </button>
         </div>
 
         <!-- Cash Tab -->
@@ -553,6 +607,11 @@
         <!-- UPI Tab -->
         <div id="payModeUpiTab" style="display: none; text-align: center;">
           <div id="upiQrCodeContainer" style="margin-bottom: 10px;"></div>
+        </div>
+
+        <!-- Credit (pay later) Tab -->
+        <div id="payModeCreditTab" style="display: none;">
+          <div id="creditInfoBox" style="background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:12px; font-size:13px; color:#92400e;"></div>
         </div>
       </div>
 
@@ -715,7 +774,149 @@
     </div>
   </div>
 
+  <!-- 12. Held Bills Modal -->
+  <div class="modal-overlay" id="heldBillsModal">
+    <div class="modal-box" style="max-width: 560px;">
+      <div class="modal-header">
+        <h3><i class="fas fa-pause-circle text-warning"></i> Held Bills</h3>
+        <button class="modal-close-btn" onclick="closeModal('heldBillsModal')">&times;</button>
+      </div>
+      <div class="modal-body" id="heldBillsBody"></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('heldBillsModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 13. Return Items Modal -->
+  <div class="modal-overlay" id="returnModal">
+    <div class="modal-box" style="max-width: 620px;">
+      <div class="modal-header">
+        <h3><i class="fas fa-rotate-left text-primary"></i> Return Items / Refund</h3>
+        <button class="modal-close-btn" onclick="closeModal('returnModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="returnSaleId">
+        <div id="returnModalBody"></div>
+        <div class="form-row" style="margin-top: 12px;">
+          <div class="form-group">
+            <label class="form-label">Reason *</label>
+            <select id="returnReason" class="form-control">
+              <option>Damaged / defective</option>
+              <option>Wrong item</option>
+              <option>Customer changed mind</option>
+              <option>Expired product</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Refund amount</label>
+            <div id="returnRefundPreview" style="font-size: 22px; font-weight: 800; color: #b91c1c;">0.00</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('returnModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveReturn()"><i class="fas fa-check"></i> Process Return</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 14. Customer Payment (dues) Modal -->
+  <div class="modal-overlay" id="customerPaymentModal">
+    <div class="modal-box" style="max-width: 420px;">
+      <div class="modal-header">
+        <h3><i class="fas fa-hand-holding-dollar text-success"></i> Receive Payment</h3>
+        <button class="modal-close-btn" onclick="closeModal('customerPaymentModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="custPayId">
+        <div id="custPayInfo" style="margin-bottom: 12px; font-size: 13px;"></div>
+        <div class="form-group">
+          <label class="form-label">Amount received *</label>
+          <input type="number" id="custPayAmount" class="form-control" min="0" step="0.01">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Paid by</label>
+          <select id="custPayMode" class="form-control">
+            <option>Cash</option><option>UPI</option><option>Card</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('customerPaymentModal')">Cancel</button>
+        <button class="btn btn-success" onclick="saveCustomerPayment()"><i class="fas fa-check"></i> Record Payment</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 15. Purchase Order Modal -->
+  <div class="modal-overlay" id="poModal">
+    <div class="modal-box" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3><i class="fas fa-file-invoice text-primary"></i> New Purchase Order</h3>
+        <button class="modal-close-btn" onclick="closeModal('poModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Supplier *</label>
+          <select id="poSupplier" class="form-control"></select>
+        </div>
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead><tr><th>Product</th><th>In stock</th><th style="width:90px;">Order qty</th><th style="width:100px;">Cost price</th><th>Line total</th><th></th></tr></thead>
+            <tbody id="poItemsBody"></tbody>
+          </table>
+        </div>
+        <div style="display:flex; gap:8px; margin-top:10px; align-items:center; flex-wrap:wrap;">
+          <select id="poAddProduct" class="form-control" style="max-width: 280px;"></select>
+          <button class="btn btn-secondary btn-sm" onclick="poAddLine()"><i class="fas fa-plus"></i> Add product</button>
+          <div style="margin-left:auto; font-weight:800;">Total: <span id="poTotalDisplay">0.00</span></div>
+        </div>
+        <div class="form-group" style="margin-top:12px;">
+          <label class="form-label">Note</label>
+          <input type="text" id="poNote" class="form-control" placeholder="Optional note for the supplier">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('poModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="savePurchaseOrder()"><i class="fas fa-save"></i> Save Order</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 16. Receive Purchase Order Modal -->
+  <div class="modal-overlay" id="poReceiveModal">
+    <div class="modal-box" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3><i class="fas fa-truck-loading text-success"></i> Receive Order</h3>
+        <button class="modal-close-btn" onclick="closeModal('poReceiveModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="poReceiveId">
+        <div id="poReceiveInfo" style="margin-bottom: 12px; font-size: 13px;"></div>
+        <div class="form-group">
+          <label class="form-label">Payment to supplier</label>
+          <select id="poReceivePayment" class="form-control">
+            <option value="Paid">Paid now</option>
+            <option value="Pending">Pending (pay later)</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('poReceiveModal')">Cancel</button>
+        <button class="btn btn-success" onclick="confirmReceivePO()"><i class="fas fa-check"></i> Add to Stock</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Database & Application Scripts -->
+  <div id="printArea"></div>
+  <input type="file" id="productCsvInput" accept=".csv,text/csv" style="display:none" onchange="handleProductCsvImport(this)">
+
+  <!-- PDF export (loaded from cdnjs; Print still works if offline) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   <script src="database.js"></script>
   <script src="app.js"></script>
 </body>

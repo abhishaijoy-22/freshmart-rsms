@@ -452,6 +452,11 @@ class RSMSDatabase {
   // Brings older saved data up to date (new fields, hashed passwords)
   migrate(data) {
     data.activityLog = data.activityLog || [];
+    data.heldBills = data.heldBills || [];
+    data.purchaseOrders = data.purchaseOrders || [];
+    data.customerPayments = data.customerPayments || [];
+    data.stockCounts = data.stockCounts || [];
+    (data.customers || []).forEach(c => { if (typeof c.balanceDue !== 'number') c.balanceDue = 0; });
     data.stockAdjustments = data.stockAdjustments || [];
     data.categories = data.categories || [];
     data.users.forEach(u => {
@@ -542,6 +547,9 @@ class RSMSDatabase {
     if (user.password !== rsmsHash(password)) {
       return { success: false, message: "Invalid password." };
     }
+    if (user.status === "pending") {
+      return { success: false, message: "Your account is waiting for approval by the Administrator." };
+    }
     if (user.status !== "active") {
       return { success: false, message: "User account is inactive. Please contact Administrator." };
     }
@@ -593,6 +601,42 @@ class RSMSDatabase {
     this.saveData();
     this.logActivity('User deleted', removed.username);
     return true;
+  }
+
+  // Staff can ask for an account; it stays "pending" until an Admin approves it
+  registerUser({ name, username, password }) {
+    name = (name || '').trim();
+    username = (username || '').trim();
+    if (name.length < 2) throw new Error("Please enter your full name.");
+    if (!/^[A-Za-z0-9_.]{3,20}$/.test(username)) throw new Error("Username must be 3-20 letters, numbers, dots or underscores.");
+    if (!password || password.length < 6) throw new Error("Password must be at least 6 characters.");
+    if (this.data.users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
+      throw new Error(`Username '${username}' is already taken.`);
+    }
+    const newId = (this.data.users.reduce((max, u) => Math.max(max, u.userId), 0) || 0) + 1;
+    this.data.users.push({
+      userId: newId, name: name, username: username, password: rsmsHash(password),
+      role: "cashier", status: "pending", createdAt: new Date().toISOString().split('T')[0]
+    });
+    this.saveData();
+    this.actor = name;
+    this.logActivity('Account requested', `${username} asked for an account (waiting for approval)`);
+    this.actor = null;
+    return true;
+  }
+
+  getPendingUserCount() {
+    return this.data.users.filter(u => u.status === 'pending').length;
+  }
+
+  setUserStatus(userId, status) {
+    const user = this.data.users.find(u => u.userId === parseInt(userId));
+    if (!user) throw new Error("User not found.");
+    if (user.username === 'admin' && status !== 'active') throw new Error("The main admin account cannot be deactivated.");
+    user.status = status;
+    this.saveData();
+    this.logActivity(status === 'active' ? 'User approved / activated' : 'User deactivated', user.username);
+    return user;
   }
 
   changePassword(userId, oldPassword, newPassword) {
@@ -1012,6 +1056,12 @@ class RSMSDatabase {
     if (!cartItems || cartItems.length === 0) {
       throw new Error("Cannot checkout an empty bill.");
     }
+    if (paymentMode === 'Credit') {
+      const creditCustomer = this.getCustomerById(customerId);
+      if (!creditCustomer || creditCustomer.customerId === 1) {
+        throw new Error("Credit (pay later) is only for registered customers. Choose a customer first.");
+      }
+    }
 
     // 1. Stock Availability Check (TC08 & Figure 7)
     for (const item of cartItems) {
@@ -1064,8 +1114,12 @@ class RSMSDatabase {
       paymentMode: paymentMode,
       items: calculation.items,
       status: "Completed",
+      amountDue: paymentMode === 'Credit' ? calculation.totalAmount : 0,
       notes: notes
     };
+    if (paymentMode === 'Credit') {
+      customer.balanceDue = (customer.balanceDue || 0) + calculation.totalAmount;
+    }
 
     this.data.sales.unshift(newSale);
     this.saveData();
@@ -1092,10 +1146,16 @@ class RSMSDatabase {
     const sale = this.getSaleById(saleId);
     if (!sale) throw new Error("Bill not found.");
     if (sale.status === 'Cancelled') throw new Error("This bill is already cancelled.");
+    if (sale.status === 'Returned') throw new Error("All items of this bill were already returned.");
     sale.items.forEach(item => {
       const product = this.getProductById(item.productId);
-      if (product) product.stockQuantity += item.quantity;
+      if (product) product.stockQuantity += item.quantity - (item.returnedQty || 0);
     });
+    if (sale.paymentMode === 'Credit' && (sale.amountDue || 0) > 0) {
+      const cust = this.getCustomerById(sale.customerId);
+      if (cust) cust.balanceDue = Math.max(0, (cust.balanceDue || 0) - sale.amountDue);
+      sale.amountDue = 0;
+    }
     sale.status = 'Cancelled';
     sale.cancelReason = reason || 'No reason given';
     sale.cancelledBy = this.actor || 'System';
@@ -1110,8 +1170,295 @@ class RSMSDatabase {
 
   // ================= REPORTS & ANALYTICS (MANAGER & OWNER) =================
   // Daily, weekly, monthly sales reports, top selling products, profit calculation
+  // ================= NET AMOUNT OF A BILL (after cancel / returns) =================
+  netAmount(sale) {
+    if (!sale || sale.status === 'Cancelled') return 0;
+    return Math.max(0, sale.totalAmount - (sale.refundedAmount || 0));
+  }
+
+  _stamp() {
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    return `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  }
+
+  // ================= SALES RETURNS / REFUNDS =================
+  returnItems(saleId, lines, reason) {
+    const sale = this.getSaleById(saleId);
+    if (!sale) throw new Error("Bill not found.");
+    if (sale.status === 'Cancelled') throw new Error("This bill was cancelled.");
+    if (sale.status === 'Returned') throw new Error("All items of this bill were already returned.");
+    const chosen = (lines || []).filter(l => parseInt(l.quantity) > 0);
+    if (chosen.length === 0) throw new Error("Choose at least one item and quantity to return.");
+
+    const ratio = sale.subtotal > 0 ? sale.totalAmount / sale.subtotal : 1; // share of tax and discount
+    let refund = 0;
+    const returned = [];
+    chosen.forEach(l => {
+      const item = sale.items.find(i => i.productId === parseInt(l.productId));
+      if (!item) throw new Error("Item not found on this bill.");
+      const qty = parseInt(l.quantity);
+      const left = item.quantity - (item.returnedQty || 0);
+      if (qty > left) throw new Error(`Only ${left} unit(s) of "${item.productName}" can still be returned.`);
+      refund += item.price * qty * ratio;
+      returned.push({ productId: item.productId, productName: item.productName, quantity: qty });
+    });
+    refund = parseFloat(refund.toFixed(2));
+
+    // Put stock back, mark items as returned
+    returned.forEach(r => {
+      const item = sale.items.find(i => i.productId === r.productId);
+      item.returnedQty = (item.returnedQty || 0) + r.quantity;
+      const product = this.getProductById(r.productId);
+      if (product) product.stockQuantity += r.quantity;
+    });
+
+    // For pay-later bills, the refund first reduces what the customer still owes
+    let cashRefund = refund;
+    if (sale.paymentMode === 'Credit' && (sale.amountDue || 0) > 0) {
+      const reduce = Math.min(sale.amountDue, refund);
+      sale.amountDue = parseFloat((sale.amountDue - reduce).toFixed(2));
+      const cust = this.getCustomerById(sale.customerId);
+      if (cust) cust.balanceDue = Math.max(0, parseFloat(((cust.balanceDue || 0) - reduce).toFixed(2)));
+      cashRefund = parseFloat((refund - reduce).toFixed(2));
+    }
+
+    sale.returns = sale.returns || [];
+    sale.returns.push({
+      returnId: sale.returns.length + 1, date: this._stamp(), items: returned,
+      refundAmount: refund, cashRefund: cashRefund, reason: reason || 'No reason given', by: this.actor || 'System'
+    });
+    sale.refundedAmount = parseFloat(((sale.refundedAmount || 0) + refund).toFixed(2));
+    const allBack = sale.items.every(i => (i.returnedQty || 0) >= i.quantity);
+    sale.status = allBack ? 'Returned' : 'Partially Returned';
+    this.saveData();
+    this.logActivity('Items returned', `${sale.billNo}: refund ${refund.toFixed(2)} (${reason || 'no reason'})`);
+    return { sale, refund, cashRefund };
+  }
+
+  // ================= HELD BILLS =================
+  holdBill({ customerId, cart, discount, note }) {
+    if (!cart || cart.length === 0) throw new Error("There is nothing on the bill to hold.");
+    const customer = this.getCustomerById(customerId) || { customerId: 1, name: "Walk-in Customer" };
+    const holdId = (this.data.heldBills.reduce((m, h) => Math.max(m, h.holdId), 0) || 0) + 1;
+    const held = {
+      holdId, date: this._stamp(), customerId: customer.customerId, customerName: customer.name,
+      cart: JSON.parse(JSON.stringify(cart)), discount: parseFloat(discount) || 0,
+      note: note || '', heldBy: this.actor || 'System'
+    };
+    this.data.heldBills.unshift(held);
+    this.saveData();
+    this.logActivity('Bill held', `${cart.length} item(s) for ${customer.name}`);
+    return held;
+  }
+  getHeldBills() { return [...this.data.heldBills]; }
+  takeHeldBill(holdId) {
+    const idx = this.data.heldBills.findIndex(h => h.holdId === parseInt(holdId));
+    if (idx === -1) throw new Error("Held bill not found.");
+    const held = this.data.heldBills.splice(idx, 1)[0];
+    this.saveData();
+    this.logActivity('Held bill resumed', `${held.customerName}`);
+    return held;
+  }
+  deleteHeldBill(holdId) {
+    const idx = this.data.heldBills.findIndex(h => h.holdId === parseInt(holdId));
+    if (idx === -1) throw new Error("Held bill not found.");
+    this.data.heldBills.splice(idx, 1);
+    this.saveData();
+    this.logActivity('Held bill discarded', '');
+    return true;
+  }
+
+  // ================= CUSTOMER CREDIT / DUES =================
+  getCustomerDue(customerId) {
+    const c = this.getCustomerById(customerId);
+    return c ? (c.balanceDue || 0) : 0;
+  }
+  receiveCustomerPayment(customerId, amount, mode, note) {
+    const c = this.getCustomerById(customerId);
+    if (!c) throw new Error("Customer not found.");
+    const amt = parseFloat(amount);
+    if (isNaN(amt) || amt <= 0) throw new Error("Enter an amount greater than zero.");
+    if (amt > (c.balanceDue || 0) + 0.001) throw new Error(`This customer only owes ${(c.balanceDue || 0).toFixed(2)}.`);
+    let left = amt;
+    // pay the oldest credit bills first
+    [...this.data.sales].reverse().forEach(sale => {
+      if (left <= 0) return;
+      if (sale.customerId === c.customerId && sale.paymentMode === 'Credit' && (sale.amountDue || 0) > 0) {
+        const pay = Math.min(left, sale.amountDue);
+        sale.amountDue = parseFloat((sale.amountDue - pay).toFixed(2));
+        left -= pay;
+      }
+    });
+    c.balanceDue = Math.max(0, parseFloat(((c.balanceDue || 0) - amt).toFixed(2)));
+    const paymentId = (this.data.customerPayments.reduce((m, p) => Math.max(m, p.paymentId), 0) || 0) + 1;
+    this.data.customerPayments.unshift({
+      paymentId, customerId: c.customerId, customerName: c.name, amount: amt,
+      mode: mode || 'Cash', note: note || '', date: this._stamp(), user: this.actor || 'System'
+    });
+    this.saveData();
+    this.logActivity('Customer payment', `${c.name} paid ${amt.toFixed(2)} (${mode || 'Cash'})`);
+    return c;
+  }
+  getCustomerPayments(customerId) {
+    return this.data.customerPayments.filter(p => p.customerId === parseInt(customerId));
+  }
+
+  // ================= PURCHASE ORDERS =================
+  getLowStockProducts() {
+    return this.data.products.filter(p => p.stockQuantity <= p.minimumLevel);
+  }
+  suggestedOrderQty(product) {
+    return Math.max(product.minimumLevel * 3 - product.stockQuantity, product.minimumLevel, 1);
+  }
+  getPurchaseOrders() { return [...this.data.purchaseOrders]; }
+  createPurchaseOrder({ supplierId, items, note }) {
+    const supplier = this.getSupplierById(supplierId);
+    if (!supplier) throw new Error("Choose a supplier for this order.");
+    const lines = (items || []).map(i => {
+      const product = this.getProductById(i.productId);
+      const qty = parseInt(i.quantity);
+      if (!product || isNaN(qty) || qty <= 0) return null;
+      const cost = parseFloat(i.costPrice) || product.costPrice;
+      return { productId: product.productId, productName: product.name, quantity: qty, costPrice: cost, lineTotal: parseFloat((qty * cost).toFixed(2)) };
+    }).filter(Boolean);
+    if (lines.length === 0) throw new Error("Add at least one product with a quantity.");
+    const poId = (this.data.purchaseOrders.reduce((m, o) => Math.max(m, o.poId), 0) || 0) + 1;
+    const po = {
+      poId, poNumber: `PO-${1000 + poId}`, date: this._stamp(),
+      supplierId: supplier.supplierId, supplierName: supplier.name,
+      items: lines, totalAmount: parseFloat(lines.reduce((a, l) => a + l.lineTotal, 0).toFixed(2)),
+      status: 'Ordered', note: note || '', createdBy: this.actor || 'System'
+    };
+    this.data.purchaseOrders.unshift(po);
+    this.saveData();
+    this.logActivity('Purchase order created', `${po.poNumber} to ${supplier.name} (${lines.length} item(s))`);
+    return po;
+  }
+  receivePurchaseOrder(poId, paymentStatus) {
+    const po = this.data.purchaseOrders.find(o => o.poId === parseInt(poId));
+    if (!po) throw new Error("Purchase order not found.");
+    if (po.status !== 'Ordered') throw new Error(`This order is already ${po.status.toLowerCase()}.`);
+    po.items.forEach(l => {
+      this.receiveStock({
+        supplierId: po.supplierId, productId: l.productId, quantity: l.quantity, costPrice: l.costPrice,
+        invoiceNo: po.poNumber, notes: `Received against ${po.poNumber}`, paymentStatus: paymentStatus
+      });
+    });
+    po.status = 'Received';
+    po.receivedDate = this._stamp();
+    this.saveData();
+    this.logActivity('Purchase order received', po.poNumber);
+    return po;
+  }
+  cancelPurchaseOrder(poId) {
+    const po = this.data.purchaseOrders.find(o => o.poId === parseInt(poId));
+    if (!po) throw new Error("Purchase order not found.");
+    if (po.status !== 'Ordered') throw new Error(`This order is already ${po.status.toLowerCase()}.`);
+    po.status = 'Cancelled';
+    this.saveData();
+    this.logActivity('Purchase order cancelled', po.poNumber);
+    return po;
+  }
+
+  // ================= STOCK COUNT (manager check) =================
+  applyStockCount(entries, note) {
+    const lines = [];
+    (entries || []).forEach(e => {
+      const product = this.getProductById(e.productId);
+      const counted = parseInt(e.counted);
+      if (!product || isNaN(counted) || counted < 0) return;
+      if (counted === product.stockQuantity) return;
+      lines.push({ productId: product.productId, productName: product.name, system: product.stockQuantity, counted, difference: counted - product.stockQuantity });
+      product.stockQuantity = counted;
+    });
+    if (lines.length === 0) throw new Error("No differences to correct. The counted numbers match the system.");
+    const record = { countId: (this.data.stockCounts.reduce((m, c) => Math.max(m, c.countId), 0) || 0) + 1, date: this._stamp(), user: this.actor || 'System', note: note || '', lines };
+    this.data.stockCounts.unshift(record);
+    this.saveData();
+    this.logActivity('Stock count applied', `${lines.length} product(s) corrected`);
+    return record;
+  }
+  getStockCounts() { return [...this.data.stockCounts]; }
+
+  // ================= CSV IMPORT OF PRODUCTS =================
+  importProducts(rows) {
+    const result = { added: 0, updated: 0, errors: [] };
+    rows.forEach((r, i) => {
+      const line = i + 2; // row 1 is the header
+      try {
+        const name = (r.name || '').trim();
+        const price = parseFloat(r.price);
+        if (!name) throw new Error("name is empty");
+        if (isNaN(price) || price <= 0) throw new Error("price must be a number above 0");
+        let cat = null;
+        const catName = (r.category || '').trim();
+        if (catName) {
+          cat = this.data.categories.find(c => c.name.toLowerCase() === catName.toLowerCase());
+          if (!cat) cat = this.addCategory({ name: catName, description: 'Added by CSV import' });
+        } else {
+          cat = this.data.categories[0];
+        }
+        const barcode = (r.barcode || '').trim();
+        const existing = barcode ? this.getProductByBarcode(barcode) : null;
+        const cost = parseFloat(r.costprice);
+        const stock = parseInt(r.stock);
+        const minLevel = parseInt(r.minlevel);
+        const expiry = (r.expiry || '').trim();
+        if (existing) {
+          existing.name = name; existing.price = price; existing.categoryId = cat.categoryId;
+          if (!isNaN(cost)) existing.costPrice = cost;
+          if (!isNaN(stock) && stock >= 0) existing.stockQuantity = stock;
+          if (!isNaN(minLevel) && minLevel >= 0) existing.minimumLevel = minLevel;
+          if (expiry) existing.expiryDate = expiry;
+          result.updated++;
+        } else {
+          const prod = this.addProduct({
+            name, price, barcode, categoryId: cat.categoryId, costPrice: isNaN(cost) ? undefined : cost,
+            stockQuantity: isNaN(stock) ? 0 : stock, minimumLevel: isNaN(minLevel) ? undefined : minLevel, expiryDate: expiry || undefined
+          });
+          result.added++;
+        }
+      } catch (err) {
+        result.errors.push(`Row ${line}: ${err.message}`);
+      }
+    });
+    this.saveData();
+    this.logActivity('Products imported (CSV)', `${result.added} added, ${result.updated} updated, ${result.errors.length} skipped`);
+    return result;
+  }
+
+  // ================= AUTOMATIC DAILY BACKUPS (kept in this browser) =================
+  getAutoBackups() {
+    try { return JSON.parse(localStorage.getItem('RSMS_AUTO_BACKUPS') || '[]'); } catch (e) { return []; }
+  }
+  autoBackupIfDue(force = false) {
+    try {
+      const list = this.getAutoBackups();
+      const today = this._stamp().split(' ')[0];
+      if (!force && list.length && list[0].date === today) return false;
+      const snapshot = { id: Date.now(), date: today, time: this._stamp().split(' ')[1], bills: this.data.sales.length, json: JSON.stringify(this.data) };
+      const next = [snapshot, ...list.filter(b => !(force && b.date === today))].slice(0, 5);
+      localStorage.setItem('RSMS_AUTO_BACKUPS', JSON.stringify(next));
+      return true;
+    } catch (e) {
+      console.warn("Automatic backup failed", e);
+      return false;
+    }
+  }
+  restoreAutoBackup(id) {
+    const snap = this.getAutoBackups().find(b => b.id === parseInt(id));
+    if (!snap) throw new Error("That backup was not found.");
+    return this.importBackup(snap.json);
+  }
+  markExported() { try { localStorage.setItem('RSMS_LAST_EXPORT', String(Date.now())); } catch (e) {} }
+  daysSinceExport() {
+    const t = parseInt(localStorage.getItem('RSMS_LAST_EXPORT') || '0');
+    return t ? Math.floor((Date.now() - t) / 86400000) : null;
+  }
+
   getSalesReport({ startDate = null, endDate = null, period = 'all' } = {}) {
-    let salesList = this.data.sales.filter(s => s.status !== 'Cancelled');
+    let salesList = this.data.sales.filter(s => s.status !== 'Cancelled' && s.status !== 'Returned');
 
     const now = new Date();
     if (period === 'today') {
@@ -1140,16 +1487,21 @@ class RSMSDatabase {
     let totalItemsSold = 0;
 
     const productSalesMap = {};
-    const paymentModeMap = { Cash: 0, Card: 0, UPI: 0 };
+    const paymentModeMap = { Cash: 0, Card: 0, UPI: 0, Credit: 0 };
     const categorySalesMap = {};
 
     salesList.forEach(sale => {
-      totalRevenue += sale.totalAmount;
-      totalTax += sale.taxAmount;
-      totalDiscount += sale.discountAmount;
-      paymentModeMap[sale.paymentMode] = (paymentModeMap[sale.paymentMode] || 0) + sale.totalAmount;
+      const refunded = sale.refundedAmount || 0;
+      const keep = sale.totalAmount > 0 ? (sale.totalAmount - refunded) / sale.totalAmount : 1;
+      totalRevenue += sale.totalAmount - refunded;
+      totalTax += sale.taxAmount * keep;
+      totalDiscount += sale.discountAmount * keep;
+      paymentModeMap[sale.paymentMode] = (paymentModeMap[sale.paymentMode] || 0) + (sale.totalAmount - refunded);
 
-      sale.items.forEach(item => {
+      sale.items.forEach(rawItem => {
+        const keptQty = rawItem.quantity - (rawItem.returnedQty || 0);
+        if (keptQty <= 0) return;
+        const item = { ...rawItem, quantity: keptQty, itemTotal: parseFloat((rawItem.price * keptQty).toFixed(2)) };
         totalItemsSold += item.quantity;
         const cogs = (item.costPrice || 0) * item.quantity;
         totalCOGS += cogs;
