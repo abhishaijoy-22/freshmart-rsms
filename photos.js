@@ -13,10 +13,16 @@
     login: 'N_e5v6g-IXc',                 // bright supermarket aisle
     banner: 'ezeC8-clZSs',                // food aisle
     categories: {                         // category name (lower case) -> photo id
+      'groceries & staples': '2Vl1JZFmtOw',
+      'dairy & eggs': 'c6TKtsi8C1k',
+      'bakery & fresh': 'PO2GsmeN8hU',
       'fruits & vegetables': 'GPxxXAbzsXU'
     },
-    products: {                           // word in the product name (lower case) -> photo id
-      // 'banana': 'PHOTO_ID',
+    products: {                           // full product name (lower case) -> photo id
+      'milk (1 l)': '5SN5N5-JM3c',
+      'whole wheat bread (400g)': 'nymRFkQD8Og',
+      'multigrain bread (400 g)': '6D9C0lEkYVk',
+      'pav buns (6 pack)': 'q-PulMeewiw'
     }
   };
 
