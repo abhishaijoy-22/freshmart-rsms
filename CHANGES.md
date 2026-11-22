@@ -27,3 +27,4 @@
 - New theme.css (loaded last): pine green + saffron palette on warm paper, Fraunces headings with Manrope body text, new logo mark, restyled sidebar, header, dashboard, POS, tables, modals, login page and a warm dark mode.
 - No JavaScript logic changed. sw.js cache bumped to rsms-v4 and now caches theme.css.
 - Version 5: welcome.js adds an animated welcome screen after sign-in (skippable); dashboard header and KPI row restyled in theme.css. sw.js cache is now rsms-v5.
+- Version 6: polish.js (dashboard count-up, quick cash buttons in the payment window), thermal-paper receipt look, nicer empty states, focus/scrollbar styling, 404.html. sw.js cache is now rsms-v6.

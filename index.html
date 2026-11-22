@@ -618,6 +618,7 @@
           <div class="form-group">
             <label class="form-label">Cash Tendered by Customer (₹)</label>
             <input type="number" id="cashTenderedInput" class="form-control" step="1" oninput="calculateCashChange()">
+            <div class="quick-cash"><button type="button" onclick="quickCash('exact')">Exact</button><button type="button" onclick="quickCash(100)">&#8377;100</button><button type="button" onclick="quickCash(200)">&#8377;200</button><button type="button" onclick="quickCash(500)">&#8377;500</button><button type="button" onclick="quickCash(2000)">&#8377;2000</button></div>
           </div>
           <div style="background: #f1f5f9; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
             <span style="font-size: 13px; font-weight: 600;">Change to Return:</span>
@@ -954,5 +955,6 @@
   <script src="qrcode.js"></script>
   <script src="enhancements.js"></script>
   <script src="welcome.js"></script>
+  <script src="polish.js"></script>
 </body>
 </html>
