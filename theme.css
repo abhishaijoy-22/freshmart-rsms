@@ -188,3 +188,64 @@ h1, h2, h3, .page-title, .dash-hello, .login-hero h2, .login-brand h1, .brand-ti
 @media (max-width: 900px) { .content-body { padding: 20px 16px 40px; } .dash-hello { font-size: 22px; } .login-card { padding: 30px 24px; } }
 @media print { .top-header, .sidebar { display: none; } }
 .dash-panel { border: none; box-shadow: none; background: transparent; border-radius: 0; }
+
+/* ================= Welcome screen (between login and dashboard) ================= */
+#welcomeScreen { position: fixed; inset: 0; z-index: 7000; display: flex; align-items: center; justify-content: center; text-align: center; color: #f6f1e4; cursor: pointer; overflow: hidden;
+  background: radial-gradient(circle at 50% 38%, #1f5a43 0%, #112a20 52%, #0a140f 100%); animation: wsIn .5s ease both; transition: opacity .6s ease, transform .6s ease, filter .6s ease; }
+#welcomeScreen.leaving { opacity: 0; transform: scale(1.04); filter: blur(6px); pointer-events: none; }
+#welcomeScreen::before { content: ""; position: absolute; inset: 0; opacity: .5; background-image: radial-gradient(rgba(255,255,255,.07) 1px, transparent 1px); background-size: 26px 26px; }
+.ws-glow { position: absolute; width: 640px; height: 640px; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -62%); background: radial-gradient(circle, rgba(224,160,48,.22), transparent 62%); animation: wsPulse 3s ease-in-out infinite; }
+.ws-inner { position: relative; padding: 24px; max-width: 520px; width: 100%; }
+.ws-mark { position: relative; width: 104px; height: 104px; margin: 0 auto 26px; display: flex; align-items: center; justify-content: center; }
+.ws-logo { width: 84px; height: 84px; border-radius: 26px; display: flex; align-items: center; justify-content: center; color: #fbf0d9; background: linear-gradient(145deg, #2f8564, #1d5b45); box-shadow: 0 16px 40px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.14); animation: wsPop .8s cubic-bezier(.2,1.4,.4,1) both; }
+.ws-logo svg { width: 54px; height: 54px; }
+.ws-ring { position: absolute; inset: 0; border-radius: 32px; border: 1.5px solid rgba(224,160,48,.55); animation: wsRing 2.4s ease-out infinite; }
+.ws-ring2 { animation-delay: 1.1s; }
+.ws-kicker { font-size: 12px; letter-spacing: .28em; text-transform: uppercase; color: #e0a030; font-weight: 700; margin-bottom: 12px; animation: wsUp .7s .25s ease both; }
+.ws-title { font-family: var(--font-display); font-weight: 500; font-size: 46px; line-height: 1.08; letter-spacing: -.015em; color: #fbf3de; animation: wsUp .7s .4s ease both; }
+.ws-title em { font-style: italic; color: #f3c46a; }
+.ws-role { margin-top: 10px; color: #b9cdc0; font-size: 15px; animation: wsUp .7s .55s ease both; }
+.ws-steps { list-style: none; margin: 30px auto 0; display: inline-grid; gap: 10px; text-align: left; }
+.ws-steps li { display: flex; align-items: center; gap: 12px; font-size: 14px; color: #d7e4db; opacity: 0; animation: wsStep .5s ease both; }
+.ws-steps b { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.3); position: relative; flex-shrink: 0; animation: wsTick .4s ease both; animation-delay: inherit; }
+.ws-steps li:nth-child(1) b { animation-delay: 1.0s; } .ws-steps li:nth-child(2) b { animation-delay: 1.6s; } .ws-steps li:nth-child(3) b { animation-delay: 2.2s; } .ws-steps li:nth-child(4) b { animation-delay: 2.8s; }
+.ws-steps b::after { content: ""; position: absolute; left: 5px; top: 1.5px; width: 4px; height: 8px; border: solid #12211b; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.ws-bar { width: 240px; height: 4px; margin: 28px auto 0; border-radius: 4px; background: rgba(255,255,255,.12); overflow: hidden; }
+.ws-bar i { display: block; height: 100%; width: 0; border-radius: 4px; background: linear-gradient(90deg, #e0a030, #f3c46a); animation: wsBar 3.3s .2s ease-out forwards; }
+.ws-skip { margin-top: 22px; background: none; border: none; color: #8da396; font: inherit; font-size: 13px; cursor: pointer; }
+.ws-skip:hover { color: #f6f1e4; }
+@keyframes wsIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes wsUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes wsPop { from { opacity: 0; transform: scale(.5) rotate(-8deg); } to { opacity: 1; transform: none; } }
+@keyframes wsRing { 0% { transform: scale(.85); opacity: .9; } 100% { transform: scale(1.7); opacity: 0; } }
+@keyframes wsPulse { 0%,100% { opacity: .7; } 50% { opacity: 1; } }
+@keyframes wsStep { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
+@keyframes wsTick { to { background: #e0a030; border-color: #e0a030; } }
+@keyframes wsBar { to { width: 100%; } }
+@media (max-width: 600px) { .ws-title { font-size: 34px; } }
+@media (prefers-reduced-motion: reduce) { #welcomeScreen *, #welcomeScreen { animation-duration: .01s !important; animation-delay: 0s !important; } .ws-steps li { opacity: 1; } }
+
+/* ================= Dashboard: a different layout feel ================= */
+.dash-hero { background: transparent; box-shadow: none; padding: 4px 2px 22px; border-radius: 0; overflow: visible; align-items: flex-end; }
+.dash-hero::after { display: none; }
+.dash-hello { color: var(--text-main); font-size: 36px; font-weight: 500; line-height: 1.1; }
+.dash-date { color: var(--text-muted); font-size: 14px; margin-top: 8px; }
+.dash-actions .btn { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); }
+.dash-actions .btn:hover { background: #f1ede2; }
+.dash-actions .btn-primary { background: var(--primary); color: #fff; border-color: transparent; }
+.dash-actions .btn-primary:hover { background: var(--primary-hover); }
+/* first KPI becomes the featured tile */
+#view-dashboard .stats-grid { grid-template-columns: 1.35fr 1fr 1fr 1fr; gap: 18px; }
+#view-dashboard .stats-grid .dash-kpi:first-child { background: linear-gradient(150deg, #1d5b45 0%, #123d2f 100%); border-color: transparent; color: #fff; box-shadow: 0 18px 34px -16px rgba(18,61,47,.7); }
+#view-dashboard .stats-grid .dash-kpi:first-child::before { display: none; }
+#view-dashboard .stats-grid .dash-kpi:first-child h3, #view-dashboard .stats-grid .dash-kpi:first-child .stat-trend { color: #cfe0d6 !important; }
+#view-dashboard .stats-grid .dash-kpi:first-child .stat-number { color: #fbf0d9; font-size: 40px; }
+#view-dashboard .stats-grid .dash-kpi:first-child .stat-icon { background: rgba(255,255,255,.12); color: #f3c46a; }
+.dash-kpi, .dash-grid .table-card { animation: wsUp .6s ease both; }
+.dash-kpi:nth-child(2) { animation-delay: .06s; } .dash-kpi:nth-child(3) { animation-delay: .12s; } .dash-kpi:nth-child(4) { animation-delay: .18s; }
+.dash-grid .table-card { animation-delay: .24s; }
+@media (max-width: 1100px) { #view-dashboard .stats-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (max-width: 600px) { .dash-hello { font-size: 26px; } #view-dashboard .stats-grid { grid-template-columns: 1fr; } }
+[data-theme="dark"] .dash-hello { color: var(--text-main); }
+[data-theme="dark"] .dash-actions .btn { background: #1b2620; border-color: var(--border-color); color: var(--text-main); }
+[data-theme="dark"] .dash-actions .btn-primary { background: #2f7a5c; }
