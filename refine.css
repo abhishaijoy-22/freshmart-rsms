@@ -1,0 +1,116 @@
+/* FreshMart RSMS - refine.css
+   Refinements for: login page, stat cards, tables and charts.
+   Loaded after cinematic.css and photos.css; uses the same colour variables, so dark and light themes both work. */
+
+/* ============ 1. LOGIN PAGE ============ */
+:root[data-theme] .login-card {
+  position: relative; border: 1px solid var(--border-color); border-radius: 3px; padding: 34px 32px 28px;
+  background: var(--bg-card);
+  background: color-mix(in srgb, var(--bg-card) 90%, transparent);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-lg);
+}
+:root[data-theme] .login-card::before { content: ""; position: absolute; left: -1px; top: -1px; width: 56px; height: 2px; background: var(--primary); }
+:root[data-theme] .login-brand h1 { font-family: var(--font-display); font-weight: 300; font-size: 22px; letter-spacing: .16em; text-transform: uppercase; }
+:root[data-theme] .login-brand p { color: var(--text-muted); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; }
+:root[data-theme] .login-card .form-label { font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
+:root[data-theme] .login-card .form-control {
+  background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 2px; padding: 13px 14px; color: var(--text-main);
+  transition: border-color .2s var(--ease), box-shadow .2s var(--ease);
+}
+:root[data-theme] .login-card .form-control::placeholder { color: var(--text-muted); opacity: .6; }
+:root[data-theme] .login-card .form-control:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
+:root[data-theme] .login-card .btn-primary {
+  position: relative; overflow: hidden; padding: 14px 18px; border-radius: 2px;
+  font-size: 12px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase;
+}
+:root[data-theme] .login-card .btn-primary::after {
+  content: ""; position: absolute; top: 0; bottom: 0; left: -60%; width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.28), transparent); transform: skewX(-20deg); transition: left .6s var(--ease);
+}
+:root[data-theme] .login-card .btn-primary:hover::after { left: 130%; }
+:root[data-theme] .login-error { border-left: 3px solid var(--primary); border-radius: 2px; background: var(--primary-light); color: var(--text-main); }
+:root[data-theme] .login-switch { color: var(--text-muted); font-size: 13px; }
+:root[data-theme] .login-switch a { color: var(--primary); text-decoration: none; border-bottom: 1px solid transparent; }
+:root[data-theme] .login-switch a:hover { border-bottom-color: var(--primary); }
+#registerBox hr { border-top-color: var(--border-color) !important; }
+
+/* hero list: icon chips instead of plain bullets */
+:root[data-theme] .login-hero ul { list-style: none; padding: 0; margin: 26px 0 0; display: grid; gap: 14px; }
+:root[data-theme] .login-hero li { display: flex; align-items: center; gap: 14px; font-size: 14px; }
+:root[data-theme] .login-hero li i {
+  flex: 0 0 32px; width: 32px; height: 32px; display: inline-grid; place-items: center;
+  border: 1px solid var(--border-color); background: rgba(228,87,46,.08); border-radius: 2px; font-size: 13px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes rfUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  .login-hero > * { animation: rfUp .7s var(--ease) both; }
+  .login-hero > *:nth-child(2) { animation-delay: .08s; } .login-hero > *:nth-child(3) { animation-delay: .16s; }
+  .login-hero > *:nth-child(4) { animation-delay: .24s; } .login-hero > *:nth-child(5) { animation-delay: .32s; }
+  .login-card { animation: rfUp .8s .15s var(--ease) both; }
+}
+
+/* ============ 2. STAT CARDS ============ */
+:root[data-theme] .stats-grid { gap: 14px; }
+:root[data-theme] .stat-card, :root[data-theme] .stat-card:hover {
+  position: relative; overflow: hidden; border: 1px solid var(--border-color); border-radius: 3px; padding: 22px 24px;
+  transition: border-color .25s var(--ease), background .25s var(--ease);
+}
+:root[data-theme] .stat-card::before {
+  content: ""; position: absolute; left: 0; top: 0; height: 2px; width: 34px; background: var(--primary); transition: width .4s var(--ease);
+}
+:root[data-theme] .stat-card:hover { border-color: color-mix(in srgb, var(--primary) 45%, var(--border-color)); background: var(--raise); }
+:root[data-theme] .stat-card:hover::before { width: 100%; }
+:root[data-theme] .stat-number { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; line-height: 1.15; margin-top: 6px; }
+:root[data-theme] .stat-trend { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border-color); letter-spacing: .02em; }
+
+/* ============ 3. TABLES ============ */
+:root[data-theme] .table-header { padding: 18px 22px; }
+:root[data-theme] .table-responsive { overflow: auto; max-height: 70vh; }
+:root[data-theme] .custom-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+:root[data-theme] .custom-table th {
+  position: sticky; top: 0; z-index: 2; padding: 12px 18px; text-align: left; background: var(--bg-card);
+  border-bottom: 1px solid var(--border-color); box-shadow: 0 1px 0 var(--border-color);
+}
+:root[data-theme] .custom-table td { padding: 13px 18px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+:root[data-theme] .custom-table tbody tr:nth-child(even) td { background: color-mix(in srgb, var(--raise) 40%, transparent); }
+:root[data-theme] .custom-table tbody tr { transition: background .15s var(--ease); }
+:root[data-theme] .custom-table tbody tr:hover td { background: var(--raise); }
+:root[data-theme] .custom-table tbody tr:hover td:first-child { box-shadow: inset 2px 0 0 var(--primary); }
+:root[data-theme] .custom-table tbody tr:last-child td { border-bottom: 0; }
+
+/* ============ 4. CHARTS ============ */
+/* ABC analysis tiles (built in enhancements.js) */
+:root[data-theme] .abc-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 16px; }
+:root[data-theme] .abc-tile { display: flex; align-items: center; gap: 16px; padding: 16px 18px; background: var(--raise); border: 1px solid var(--border-color); border-radius: 3px; }
+:root[data-theme] .abc-letter {
+  flex: 0 0 46px; width: 46px; height: 46px; display: grid; place-items: center; border: 1px solid currentColor; border-radius: 2px;
+  font: 300 26px/1 var(--font-display); color: var(--primary);
+}
+:root[data-theme] .abc-tile.abc-B .abc-letter { color: var(--steel); }
+:root[data-theme] .abc-tile.abc-C .abc-letter { color: var(--text-muted); }
+:root[data-theme] .abc-pill { border-radius: 2px; letter-spacing: .1em; font-weight: 700; }
+
+/* Sales Trend chart (dashboard) */
+:root[data-theme] .trend-bar {
+  background: linear-gradient(to top, color-mix(in srgb, var(--steel) 45%, transparent), var(--steel));
+  border-radius: 2px 2px 0 0; transition: filter .2s var(--ease), background .2s var(--ease);
+}
+:root[data-theme] .trend-col:hover .trend-bar, :root[data-theme] .trend-bar:hover {
+  background: linear-gradient(to top, color-mix(in srgb, var(--primary) 55%, transparent), var(--primary)); filter: brightness(1.1);
+}
+:root[data-theme] .trend-value { font-family: var(--font-num); font-size: 11px; letter-spacing: .02em; color: var(--text-main); font-variant-numeric: tabular-nums; }
+:root[data-theme] .trend-label { font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-muted); }
+
+/* Progress bars in "Revenue by Product Category" and "Payment Methods Breakdown" (reports) */
+:root[data-theme] .table-card div[style*="height: 8px"] { background: var(--raise) !important; border-radius: 2px !important; height: 6px !important; }
+:root[data-theme] .table-card div[style*="height: 8px"] > div {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--primary) 55%, transparent), var(--primary)) !important; border-radius: 2px !important;
+}
+:root[data-theme] .table-card div[style*="justify-content: space-between"] { font-variant-numeric: tabular-nums; }
+
+@media (max-width: 640px) {
+  :root[data-theme] .login-card { padding: 26px 20px 22px; }
+  :root[data-theme] .custom-table th, :root[data-theme] .custom-table td { padding: 11px 12px; }
+}

@@ -63,39 +63,36 @@
     grid.parentNode.insertBefore(box, grid);
   }
 
-  /* ---------- 3. Category cards ---------- */
+  /* ---------- 3. Categories page (table rows) ---------- */
   function categoryPhotos() {
     const view = document.getElementById('view-categories');
-    if (!view || !db()) return;
-    const names = db().getCategories().map((c) => c.name);
-    view.querySelectorAll('[class*="card"]').forEach((card) => {
-      if (card.dataset.ph || card.querySelector('[class*="card"]')) return;
-      const text = card.textContent.toLowerCase();
-      const name = names.find((n) => text.includes(n.toLowerCase()));
-      const id = name && PHOTOS.categories[name.toLowerCase()];
-      card.dataset.ph = '1';
+    if (!view) return;
+    view.querySelectorAll('tbody tr').forEach((row) => {
+      if (row.dataset.ph) return;
+      row.dataset.ph = '1';
+      const name = row.querySelector('td strong');
+      const id = name && PHOTOS.categories[name.textContent.trim().toLowerCase()];
       if (!id) return;
-      const strip = document.createElement('div'); strip.className = 'ph-cat-photo';
-      const img = document.createElement('img'); img.alt = ''; img.loading = 'lazy'; img.src = url(id, 600);
-      img.onerror = () => strip.remove();
-      strip.appendChild(img);
-      card.insertBefore(strip, card.firstChild);
+      const holder = name.parentElement;           // the inline-flex wrapper
+      const icon = holder.firstElementChild;       // coloured icon square
+      const img = new Image();
+      img.className = 'ph-cat-thumb'; img.alt = ''; img.loading = 'lazy';
+      img.onload = () => { if (icon && icon !== name) icon.replaceWith(img); else holder.prepend(img); };
+      img.src = url(id, 200);                      // if it fails to load, the icon stays
     });
   }
 
-  /* ---------- 4. Product cards ---------- */
+  /* ---------- 4. Product cards and product tables ---------- */
   function productPhotos() {
-    const keys = Object.keys(PHOTOS.products);
-    if (!keys.length) return;
-    document.querySelectorAll('.product-card .product-img').forEach((el) => {
-      if (el.tagName !== 'IMG' || el.dataset.ph) return;
-      const text = (el.closest('.product-card').textContent || '').toLowerCase();
-      const key = keys.find((k) => text.includes(k));
+    if (!Object.keys(PHOTOS.products).length) return;
+    document.querySelectorAll('img.product-img, img.table-prod-thumb').forEach((el) => {
+      if (el.dataset.ph) return;
       el.dataset.ph = '1';
-      if (!key) return;
+      const id = PHOTOS.products[(el.alt || '').trim().toLowerCase()];
+      if (!id) return;
       const original = el.src;
       el.onerror = () => { el.onerror = null; el.src = original; el.classList.remove('ph-photo'); };
-      el.src = url(PHOTOS.products[key], 400);
+      el.src = url(id, 400);
       el.classList.add('ph-photo');
     });
   }

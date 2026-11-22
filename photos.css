@@ -22,13 +22,12 @@
 .ph-banner-text span { display: block; margin-top: 6px; font-size: 13px; letter-spacing: .06em; color: #c5ccd2; }
 .ph-credit { position: absolute; z-index: 1; right: 10px; top: 8px; font-size: 10px; letter-spacing: .08em; color: rgba(255,255,255,.55); }
 
-/* Category cards: photo strip on top */
-.ph-cat-photo { height: 110px; margin: -1px -1px 12px; overflow: hidden; border-radius: 6px 6px 0 0; background: #0b0f12; }
-.ph-cat-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* Categories table: photo thumbnail in place of the icon square */
+.ph-cat-thumb { width: 44px; height: 44px; flex: 0 0 44px; object-fit: cover; border-radius: 2px; border: 1px solid var(--border-color, #1c242b); }
 
 /* Product cards: let real photos show in colour */
-:root[data-theme="dark"] .product-img.ph-photo { filter: brightness(.9) contrast(1.05); }
-:root[data-theme="light"] .product-img.ph-photo { filter: none; }
-.product-img.ph-photo { object-fit: cover; }
+:root[data-theme="dark"] .product-img.ph-photo, :root[data-theme="dark"] .table-prod-thumb.ph-photo { filter: brightness(.9) contrast(1.05); }
+:root[data-theme="light"] .product-img.ph-photo, :root[data-theme="light"] .table-prod-thumb.ph-photo { filter: none; }
+.product-img.ph-photo, .table-prod-thumb.ph-photo { object-fit: cover; }
 
 @media (max-width: 640px) { .ph-banner { height: 130px; } .ph-banner-text strong { font-size: 18px; } }
