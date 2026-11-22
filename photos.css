@@ -1,0 +1,34 @@
+/* FreshMart RSMS - photos.css: photo backgrounds, dashboard banner, category photos */
+
+/* Login page: store photo behind the sign-in screen */
+.login-screen.ph-ready::before {
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    linear-gradient(100deg, rgba(6,8,10,.92) 0%, rgba(6,8,10,.72) 45%, rgba(6,8,10,.55) 100%),
+    var(--ph-login) center / cover no-repeat;
+}
+.login-screen.ph-ready > .login-hero,
+.login-screen.ph-ready > .login-card { position: relative; z-index: 1; }
+
+/* Dashboard banner */
+.ph-banner {
+  position: relative; height: 170px; margin-bottom: 22px; overflow: hidden;
+  border: 1px solid var(--line, rgba(255,255,255,.08)); border-radius: 6px; background: #0b0f12;
+}
+.ph-banner img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(.7) saturate(1.05); }
+.ph-banner::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(6,8,10,.88), rgba(6,8,10,.15) 70%); }
+.ph-banner-text { position: absolute; z-index: 1; left: 28px; bottom: 22px; right: 28px; color: #f2f0ea; }
+.ph-banner-text strong { display: block; font: 300 24px/1.2 var(--font-display, 'Josefin Sans', sans-serif); letter-spacing: .12em; text-transform: uppercase; }
+.ph-banner-text span { display: block; margin-top: 6px; font-size: 13px; letter-spacing: .06em; color: #c5ccd2; }
+.ph-credit { position: absolute; z-index: 1; right: 10px; top: 8px; font-size: 10px; letter-spacing: .08em; color: rgba(255,255,255,.55); }
+
+/* Category cards: photo strip on top */
+.ph-cat-photo { height: 110px; margin: -1px -1px 12px; overflow: hidden; border-radius: 6px 6px 0 0; background: #0b0f12; }
+.ph-cat-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* Product cards: let real photos show in colour */
+:root[data-theme="dark"] .product-img.ph-photo { filter: brightness(.9) contrast(1.05); }
+:root[data-theme="light"] .product-img.ph-photo { filter: none; }
+.product-img.ph-photo { object-fit: cover; }
+
+@media (max-width: 640px) { .ph-banner { height: 130px; } .ph-banner-text strong { font-size: 18px; } }
