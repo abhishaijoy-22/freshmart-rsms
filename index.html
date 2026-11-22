@@ -15,11 +15,28 @@
   
   <!-- Custom Application Stylesheet -->
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="enhancements.css">
+  <meta name="theme-color" content="#16a34a">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
 </head>
 <body>
 
   <!-- ================= LOGIN SCREEN ================= -->
   <div id="loginScreen" class="login-screen">
+    <button class="theme-toggle login-theme-toggle" onclick="toggleTheme()" title="Switch light / dark theme" aria-label="Switch theme"><i class="fas fa-moon"></i></button>
+    <div class="login-hero">
+      <div class="hero-badge"><i class="fas fa-store-alt"></i></div>
+      <h2>Run the whole shop<br>from one screen.</h2>
+      <p>Billing, stock, customers, suppliers and reports in one place. No notebooks, no Excel sheets.</p>
+      <ul>
+        <li><i class="fas fa-bolt"></i> Fast billing with barcode, UPI QR and bill sharing</li>
+        <li><i class="fas fa-bell"></i> Alerts before stock runs out or expires</li>
+        <li><i class="fas fa-shield-halved"></i> Role-based access, hashed passwords, login lockout</li>
+        <li><i class="fas fa-chart-line"></i> Day-end closing and sales analysis for the owner</li>
+      </ul>
+    </div>
     <div class="login-card">
       <div class="login-brand">
         <div class="brand-icon"><i class="fas fa-store-alt"></i></div>
@@ -57,15 +74,15 @@
         <div style="font-size:11px; color:#64748b; margin-top:8px;">An Administrator must approve your account before you can sign in.</div>
       </div>
 
-      <div class="login-demo">
-        <strong>Demo accounts</strong>
+      <details class="login-demo">
+        <summary><strong>Demo accounts</strong> (click to view)</summary>
         <table>
           <tr><td>admin</td><td>admin123</td><td>Administrator</td></tr>
           <tr><td>manager</td><td>manager123</td><td>Store Manager</td></tr>
           <tr><td>cashier</td><td>cashier123</td><td>Cashier</td></tr>
           <tr><td>stock</td><td>stock123</td><td>Stock Clerk</td></tr>
         </table>
-      </div>
+      </details>
     </div>
   </div>
 
@@ -105,6 +122,13 @@
           <a class="nav-link" data-view="sales">
             <i class="fas fa-receipt"></i>
             <span>Sales History</span>
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" data-view="dayend">
+            <i class="fas fa-calculator"></i>
+            <span>Day-End Closing</span>
           </a>
         </li>
 
@@ -236,6 +260,10 @@
         </div>
 
         <div class="header-right">
+          <button class="header-search" onclick="openPalette()" title="Search pages, products, customers and bills" aria-label="Quick search">
+            <i class="fas fa-search"></i><span>Quick search</span><kbd>Ctrl K</kbd>
+          </button>
+          <button class="theme-toggle" id="themeToggleBtn" onclick="toggleTheme()" title="Switch light / dark theme" aria-label="Switch theme"><i class="fas fa-moon"></i></button>
           <!-- Live Date Clock -->
           <div class="header-time" id="liveClock">
             <i class="far fa-clock"></i> Loading clock...
@@ -299,6 +327,9 @@
 
         <!-- View 16: Purchase Orders -->
         <section class="page-view" id="view-orders"></section>
+
+        <!-- View 17: Day-End Closing -->
+        <section class="page-view" id="view-dayend"></section>
 
       </main>
 
@@ -562,7 +593,7 @@
       <div class="modal-body">
         <div style="text-align: center; margin-bottom: 16px;">
           <div style="font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase;">Payable Total</div>
-          <div id="payTotalAmountDisplay" style="font-size: 32px; font-weight: 800; color: #2563eb;">₹0.00</div>
+          <div id="payTotalAmountDisplay" style="font-size: 32px; font-weight: 800; color: #16a34a;">₹0.00</div>
         </div>
 
         <!-- Payment Method Tabs -->
@@ -680,7 +711,7 @@
           </div>
           <div class="form-group">
             <label class="form-label">Colour</label>
-            <input type="color" id="categoryFormColor" class="form-control" value="#2563eb" style="height: 40px; padding: 4px;">
+            <input type="color" id="categoryFormColor" class="form-control" value="#16a34a" style="height: 40px; padding: 4px;">
           </div>
         </div>
       </div>
@@ -919,5 +950,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   <script src="database.js"></script>
   <script src="app.js"></script>
+  <script src="qrcode.js"></script>
+  <script src="enhancements.js"></script>
 </body>
 </html>

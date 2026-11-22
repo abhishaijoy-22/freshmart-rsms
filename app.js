@@ -389,7 +389,7 @@ function renderPOS() {
         <div class="pos-search-bar">
           <div class="search-input-wrap">
             <i class="fas fa-search"></i>
-            <input type="text" id="posSearchInput" class="search-input" placeholder="Search product by name or scan barcode (e.g. 890123456001)..." value="${state.pos.searchQuery}">
+            <input type="text" id="posSearchInput" class="search-input" placeholder="Search product by name or scan barcode (e.g. 890123456001)..." value="${esc(state.pos.searchQuery)}">
           </div>
           <button class="btn btn-secondary btn-sm" onclick="clearPOSSearch()" title="Clear Search">
             <i class="fas fa-times"></i>
@@ -470,7 +470,7 @@ function renderPOS() {
 
           <div class="summary-row total-row">
             <span>Total Amount</span>
-            <span id="posTotalDisplay" style="color: #2563eb;">${settings.currency}0.00</span>
+            <span id="posTotalDisplay" style="color: #16a34a;">${settings.currency}0.00</span>
           </div>
 
           <!-- Hold / resume bills -->
@@ -525,7 +525,7 @@ function renderPOSProducts() {
     grid.innerHTML = `
       <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #94a3b8;">
         <i class="fas fa-search" style="font-size: 32px; margin-bottom: 8px;"></i>
-        <p>No products found matching "${state.pos.searchQuery}"</p>
+        <p>No products found matching "${esc(state.pos.searchQuery)}"</p>
       </div>
     `;
     return;
@@ -764,15 +764,15 @@ function generateUpiQR() {
         <!-- Corner 1 -->
         <rect x="5" y="5" width="25" height="25" fill="#0f172a" rx="3" />
         <rect x="9" y="9" width="17" height="17" fill="#ffffff" />
-        <rect x="13" y="13" width="9" height="9" fill="#2563eb" />
+        <rect x="13" y="13" width="9" height="9" fill="#16a34a" />
         <!-- Corner 2 -->
         <rect x="70" y="5" width="25" height="25" fill="#0f172a" rx="3" />
         <rect x="74" y="9" width="17" height="17" fill="#ffffff" />
-        <rect x="78" y="13" width="9" height="9" fill="#2563eb" />
+        <rect x="78" y="13" width="9" height="9" fill="#16a34a" />
         <!-- Corner 3 -->
         <rect x="5" y="70" width="25" height="25" fill="#0f172a" rx="3" />
         <rect x="9" y="74" width="17" height="17" fill="#ffffff" />
-        <rect x="13" y="78" width="9" height="9" fill="#2563eb" />
+        <rect x="13" y="78" width="9" height="9" fill="#16a34a" />
         <!-- Data dots -->
         <rect x="35" y="10" width="5" height="15" fill="#0f172a" />
         <rect x="45" y="5" width="8" height="8" fill="#0f172a" />
@@ -1992,7 +1992,7 @@ function renderReportsView(selectedPeriod = 'all') {
                   <span>${settings.currency}${amount.toFixed(2)} (${pct}%)</span>
                 </div>
                 <div style="height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
-                  <div style="width: ${pct}%; height: 100%; background: #2563eb; border-radius: 4px;"></div>
+                  <div style="width: ${pct}%; height: 100%; background: #16a34a; border-radius: 4px;"></div>
                 </div>
               </div>
             `;
@@ -2761,7 +2761,7 @@ function openCategoryModal(categoryId) {
     : '<i class="fas fa-tags text-primary"></i> Add Category';
   document.getElementById('categoryFormName').value = cat ? cat.name : '';
   document.getElementById('categoryFormDesc').value = cat ? cat.description : '';
-  document.getElementById('categoryFormColor').value = cat ? cat.color : '#2563eb';
+  document.getElementById('categoryFormColor').value = cat ? cat.color : '#16a34a';
   const iconSel = document.getElementById('categoryFormIcon');
   if (cat && ![...iconSel.options].some(o => o.value === cat.icon)) {
     iconSel.add(new Option('Current icon', cat.icon));
