@@ -30,3 +30,4 @@
 - Version 6: polish.js (dashboard count-up, quick cash buttons in the payment window), thermal-paper receipt look, nicer empty states, focus/scrollbar styling, 404.html. sw.js cache is now rsms-v6.
 
 - Colour + photos update: new teal accent colour (replaces ember orange) in all CSS/JS. photos.js now loads real product photos from photos/products/ (names in PHOTO_LIST.md) and falls back to the built-in picture. sw.js cache bumped to rsms-v10.
+- Fresh green palette: accent changed from teal to leaf green, dark and light surfaces tinted green. sw.js cache is rsms-v11.

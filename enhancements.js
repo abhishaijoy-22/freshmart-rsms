@@ -112,7 +112,7 @@
     store.set('rsms_theme', theme);
     document.querySelectorAll('.theme-toggle i').forEach((i) => { i.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon'; });
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', theme === 'dark' ? '#06080a' : '#e8e6df');
+    if (meta) meta.setAttribute('content', theme === 'dark' ? '#070d0a' : '#eef6f0');
   }
   window.toggleTheme = function () {
     applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');

@@ -6,10 +6,10 @@
 
 :root{
   --n-black:#000; --n-card:#0f1317; --n-line:#2a333b;
-  --n-white:#f2f0ea; --n-steel:#9aa7b2; --n-ember:#14b8a6;
+  --n-white:#f2f0ea; --n-steel:#9aa7b2; --n-ember:#22c55e;
   --n-head:'Gill Sans','Gill Sans MT','Josefin Sans',Calibri,sans-serif;
   /* common variable names, in case the site uses them */
-  --primary:#14b8a6; --primary-color:#14b8a6; --accent:#14b8a6;
+  --primary:#22c55e; --primary-color:#22c55e; --accent:#22c55e;
   --bg:#000; --bg-color:#000; --surface:#0f1317; --card-bg:#0f1317;
   --text:#f2f0ea; --text-color:#f2f0ea; --border:#2a333b; --border-color:#2a333b;
 }
@@ -37,7 +37,7 @@ main,[class*="content"],[class*="main"],section{background:transparent!important
 [class*="nav"] a,[class*="menu"] a,[class*="nav"] li{color:var(--n-steel)!important;
   text-transform:uppercase;letter-spacing:.1em;font-size:.8rem}
 [class*="nav"] .active,[class*="nav"] a:hover,[class*="menu"] a:hover,[class*="active"]{
-  color:var(--n-ember)!important;background:rgba(20,184,166,.08)!important}
+  color:var(--n-ember)!important;background:rgba(34,197,94,.08)!important}
 
 /* Buttons */
 button,.btn,[class*="btn"],input[type=submit]{
