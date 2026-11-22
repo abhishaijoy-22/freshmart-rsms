@@ -2,7 +2,7 @@
    Our own files: network first, saved copy when offline (so updates always arrive).
    Other files (icons font, PDF library): saved copy first, refreshed in the background. */
 const CACHE = 'rsms-v4';
-const SHELL = ['./', 'index.html', 'styles.css', 'enhancements.css', 'refresh.css', 'database.js', 'app.js', 'enhancements.js', 'qrcode.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png'];
+const SHELL = ['./', 'index.html', 'styles.css', 'enhancements.css', 'theme.css', 'database.js', 'app.js', 'enhancements.js', 'qrcode.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting()));

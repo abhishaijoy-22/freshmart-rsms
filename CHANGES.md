@@ -22,3 +22,7 @@
 - Product pictures: every product now has a built-in picture that matches its name (no web photos that can mismatch). Saved data is fixed automatically.
 - Printing the bill: "Print Receipt" now prints / saves the full bill as PDF (it used to print only "TAX INVOICE").
 - Dashboard: new look with greeting, quick actions for the signed-in role, "Needs attention" list, top products with bars, payment-mode split.
+
+## Version 4 (visual redesign)
+- New theme.css (loaded last): pine green + saffron palette on warm paper, Fraunces headings with Manrope body text, new logo mark, restyled sidebar, header, dashboard, POS, tables, modals, login page and a warm dark mode.
+- No JavaScript logic changed. sw.js cache bumped to rsms-v4 and now caches theme.css.
