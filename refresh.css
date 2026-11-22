@@ -93,3 +93,35 @@ body { font-size: 14px; font-family: var(--font-sans); -webkit-font-smoothing: a
 .login-brand h1 { font-weight: 600; }
 .login-demo { background: transparent; border: 1px dashed var(--border-color); color: var(--text-muted); font-size: 12px; }
 .login-switch a { color: var(--primary); }
+
+/* ---- Round 2: lessons from the reference screenshots (photo-led cards, bigger headline, readable dark login) ---- */
+/* Login: the title was dark-on-dark in dark mode */
+.login-brand h1 { color: var(--text-main); }
+.login-brand p { color: var(--text-muted); }
+.login-hero h2 { font-size: clamp(36px, 4.2vw, 54px); line-height: 1.08; letter-spacing: -.03em; font-weight: 700; margin-bottom: 18px; }
+.login-hero { max-width: 500px; }
+:root[data-theme="dark"] .login-screen { background: #08110e; }
+:root[data-theme="dark"] .login-card { background: #111b17; border: 1px solid var(--border-color); }
+
+/* POS product cards: photo first, price second */
+.product-card { border: 1px solid var(--border-color); border-radius: 8px; box-shadow: none; overflow: hidden; background: var(--bg-card); transition: border-color .15s, transform .15s; }
+.product-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: none; }
+.product-img-wrap { aspect-ratio: 4 / 3; height: auto; background: var(--bg-main); }
+.product-img { width: 100%; height: 100%; object-fit: cover; }
+.stock-tag { top: 8px; right: 8px; border-radius: 4px; font-weight: 600; backdrop-filter: blur(4px); }
+.product-name { font-weight: 600; font-size: 14px; }
+.product-barcode { font-size: 12px; }
+.product-price { font-size: 17px; font-weight: 600; color: var(--text-main); }
+.btn-add-cart { border-radius: 6px; background: var(--primary); color: #fff; }
+.cat-pill { border-radius: 6px; font-weight: 500; }
+:root .cat-pill.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+/* Dashboard: thicker meters, pine bars, bordered recent-bills table */
+.dash-meter { height: 8px; background: var(--bg-main); }
+.dash-meter i, .dash-top-row .dash-meter i { background: var(--primary); }
+.dash-alert-row .dash-meter i { background: var(--danger); }
+.dash-top-head strong, .dash-alert-main strong { font-weight: 600; }
+.trend-bar { background: var(--primary); border-radius: 4px 4px 0 0; }
+.dash-chip-red { background: color-mix(in srgb, var(--danger) 14%, transparent); color: var(--danger); }
+.dash-chip-amber { background: color-mix(in srgb, var(--accent) 20%, transparent); color: #8a5a00; }
+:root[data-theme="dark"] .dash-chip-amber { color: var(--accent); }
