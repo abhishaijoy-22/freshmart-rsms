@@ -13,6 +13,10 @@ const RSMS_DB_KEY = 'RSMS_DATABASE_V1';
 function rsmsProductArt(name) {
   const n = String(name || '').toLowerCase();
   const map = [
+    ['noodle','🍜'],['pasta','🍝'],['kurkure','🌽'],['bhujia','🥨'],['cashew','🥜'],['peanut','🥜'],['jam','🍓'],
+    ['oats','🥣'],['flakes','🥣'],['water','💧'],['coconut','🥥'],['rusk','🍞'],['muffin','🧁'],['pav ','🍞'],
+    ['dal','🫘'],['sugar','🍚'],['salt','🧂'],['turmeric','🌶️'],['chilli','🌶️'],['poha','🍚'],['ghee','🧈'],['lassi','🥛'],['cream','🥛'],
+    ['mango','🥭'],['pomegranate','🍎'],['spinach','🥬'],['carrot','🥕'],['masala','🍛'],
     ['cadbury','🍫'],['chocolate','🍫'],['oreo','🍪'],['biscuit','🍪'],['cookie','🍪'],
     ['ketchup','🍅'],['chip','🥔'],['coca','🥤'],['cola','🥤'],['pepsi','🥤'],['juice','🧃'],
     ['coffee','☕'],['tea','🍵'],['butter','🧈'],['cheese','🧀'],['paneer','🧀'],
@@ -468,6 +472,59 @@ function rsmsHash(message) {
   return H.map(x => (x >>> 0).toString(16).padStart(8, '0')).join('');
 }
 
+// ---- Catalogue expansion (v2): 44 more products and 2 new categories.
+// These are merged into saved data once (see migrate), so existing browsers get them too.
+const EXTRA_CATEGORIES = [
+  {"categoryId": 8, "name": "Fruits & Vegetables", "icon": "fa-carrot", "color": "#84cc16", "description": "Fresh fruit, vegetables and everyday kitchen produce"},
+  {"categoryId": 9, "name": "Instant & Ready Foods", "icon": "fa-bowl-food", "color": "#f97316", "description": "Cereals, oats, pasta, spreads and ready-to-eat packs"}
+];
+const EXTRA_PRODUCTS = [
+  {"productId": 119, "name": "Toor Dal (1 kg)", "categoryId": 1, "barcode": "890123456019", "price": 165.0, "costPrice": 138.0, "stockQuantity": 40, "minimumLevel": 12, "expiryDate": "2027-08-31", "imageUrl": ""},
+  {"productId": 120, "name": "Moong Dal (500 g)", "categoryId": 1, "barcode": "890123456020", "price": 88.0, "costPrice": 72.0, "stockQuantity": 35, "minimumLevel": 10, "expiryDate": "2027-08-31", "imageUrl": ""},
+  {"productId": 121, "name": "Sugar (1 kg)", "categoryId": 1, "barcode": "890123456021", "price": 48.0, "costPrice": 41.0, "stockQuantity": 60, "minimumLevel": 20, "expiryDate": "2027-12-31", "imageUrl": ""},
+  {"productId": 122, "name": "Iodised Salt (1 kg)", "categoryId": 1, "barcode": "890123456022", "price": 28.0, "costPrice": 22.0, "stockQuantity": 70, "minimumLevel": 20, "expiryDate": "2028-03-31", "imageUrl": ""},
+  {"productId": 123, "name": "Sunflower Oil (1 L)", "categoryId": 1, "barcode": "890123456023", "price": 145.0, "costPrice": 124.0, "stockQuantity": 30, "minimumLevel": 10, "expiryDate": "2027-05-31", "imageUrl": ""},
+  {"productId": 124, "name": "Basmati Rice (1 kg)", "categoryId": 1, "barcode": "890123456024", "price": 120.0, "costPrice": 98.0, "stockQuantity": 40, "minimumLevel": 12, "expiryDate": "2027-10-31", "imageUrl": ""},
+  {"productId": 125, "name": "Turmeric Powder (200 g)", "categoryId": 1, "barcode": "890123456025", "price": 62.0, "costPrice": 50.0, "stockQuantity": 25, "minimumLevel": 8, "expiryDate": "2027-09-30", "imageUrl": ""},
+  {"productId": 126, "name": "Red Chilli Powder (200 g)", "categoryId": 1, "barcode": "890123456026", "price": 78.0, "costPrice": 63.0, "stockQuantity": 25, "minimumLevel": 8, "expiryDate": "2027-09-30", "imageUrl": ""},
+  {"productId": 127, "name": "Poha (500 g)", "categoryId": 1, "barcode": "890123456027", "price": 45.0, "costPrice": 36.0, "stockQuantity": 30, "minimumLevel": 10, "expiryDate": "2027-03-31", "imageUrl": ""},
+  {"productId": 128, "name": "Fresh Paneer (200 g)", "categoryId": 2, "barcode": "890123456028", "price": 85.0, "costPrice": 72.0, "stockQuantity": 14, "minimumLevel": 8, "expiryDate": "2026-12-04", "imageUrl": ""},
+  {"productId": 129, "name": "Cheese Slices (200 g)", "categoryId": 2, "barcode": "890123456029", "price": 135.0, "costPrice": 112.0, "stockQuantity": 20, "minimumLevel": 8, "expiryDate": "2027-02-28", "imageUrl": ""},
+  {"productId": 130, "name": "Desi Ghee (500 ml)", "categoryId": 2, "barcode": "890123456030", "price": 340.0, "costPrice": 295.0, "stockQuantity": 18, "minimumLevel": 6, "expiryDate": "2027-08-31", "imageUrl": ""},
+  {"productId": 131, "name": "Sweet Lassi (200 ml)", "categoryId": 2, "barcode": "890123456031", "price": 25.0, "costPrice": 19.0, "stockQuantity": 30, "minimumLevel": 12, "expiryDate": "2026-12-10", "imageUrl": ""},
+  {"productId": 132, "name": "Fresh Cream (200 ml)", "categoryId": 2, "barcode": "890123456032", "price": 62.0, "costPrice": 52.0, "stockQuantity": 12, "minimumLevel": 6, "expiryDate": "2026-12-01", "imageUrl": ""},
+  {"productId": 133, "name": "Maggi Masala Noodles (4 pack)", "categoryId": 3, "barcode": "890123456033", "price": 56.0, "costPrice": 46.0, "stockQuantity": 60, "minimumLevel": 20, "expiryDate": "2027-02-28", "imageUrl": ""},
+  {"productId": 134, "name": "Parle-G Biscuits (800 g)", "categoryId": 3, "barcode": "890123456034", "price": 80.0, "costPrice": 66.0, "stockQuantity": 50, "minimumLevel": 15, "expiryDate": "2027-03-31", "imageUrl": ""},
+  {"productId": 135, "name": "Kurkure Masala Munch (90 g)", "categoryId": 3, "barcode": "890123456035", "price": 20.0, "costPrice": 16.0, "stockQuantity": 70, "minimumLevel": 20, "expiryDate": "2027-01-31", "imageUrl": ""},
+  {"productId": 136, "name": "Aloo Bhujia (200 g)", "categoryId": 3, "barcode": "890123456036", "price": 55.0, "costPrice": 45.0, "stockQuantity": 40, "minimumLevel": 12, "expiryDate": "2027-01-31", "imageUrl": ""},
+  {"productId": 137, "name": "Dark Chocolate 70% (100 g)", "categoryId": 3, "barcode": "890123456037", "price": 190.0, "costPrice": 155.0, "stockQuantity": 24, "minimumLevel": 8, "expiryDate": "2027-06-30", "imageUrl": ""},
+  {"productId": 138, "name": "Salted Cashews (200 g)", "categoryId": 3, "barcode": "890123456038", "price": 260.0, "costPrice": 218.0, "stockQuantity": 20, "minimumLevel": 6, "expiryDate": "2027-04-30", "imageUrl": ""},
+  {"productId": 139, "name": "Tata Tea Gold (500 g)", "categoryId": 4, "barcode": "890123456039", "price": 295.0, "costPrice": 250.0, "stockQuantity": 25, "minimumLevel": 8, "expiryDate": "2027-05-31", "imageUrl": ""},
+  {"productId": 140, "name": "Green Tea Bags (25 pack)", "categoryId": 4, "barcode": "890123456040", "price": 150.0, "costPrice": 122.0, "stockQuantity": 25, "minimumLevel": 8, "expiryDate": "2027-08-31", "imageUrl": ""},
+  {"productId": 141, "name": "Mango Juice (1 L)", "categoryId": 4, "barcode": "890123456041", "price": 110.0, "costPrice": 92.0, "stockQuantity": 25, "minimumLevel": 10, "expiryDate": "2027-01-15", "imageUrl": ""},
+  {"productId": 142, "name": "Pepsi (750 ml)", "categoryId": 4, "barcode": "890123456042", "price": 40.0, "costPrice": 33.0, "stockQuantity": 48, "minimumLevel": 15, "expiryDate": "2027-02-28", "imageUrl": ""},
+  {"productId": 143, "name": "Packaged Drinking Water (1 L)", "categoryId": 4, "barcode": "890123456043", "price": 20.0, "costPrice": 14.0, "stockQuantity": 120, "minimumLevel": 40, "expiryDate": "2027-10-31", "imageUrl": ""},
+  {"productId": 144, "name": "Coconut Water (200 ml)", "categoryId": 4, "barcode": "890123456044", "price": 40.0, "costPrice": 31.0, "stockQuantity": 30, "minimumLevel": 10, "expiryDate": "2027-01-31", "imageUrl": ""},
+  {"productId": 145, "name": "Multigrain Bread (400 g)", "categoryId": 5, "barcode": "890123456045", "price": 55.0, "costPrice": 44.0, "stockQuantity": 18, "minimumLevel": 10, "expiryDate": "2026-11-27", "imageUrl": ""},
+  {"productId": 146, "name": "Pav Buns (6 pack)", "categoryId": 5, "barcode": "890123456046", "price": 30.0, "costPrice": 24.0, "stockQuantity": 20, "minimumLevel": 10, "expiryDate": "2026-11-26", "imageUrl": ""},
+  {"productId": 147, "name": "Chocolate Muffins (2 pack)", "categoryId": 5, "barcode": "890123456047", "price": 60.0, "costPrice": 46.0, "stockQuantity": 16, "minimumLevel": 8, "expiryDate": "2026-11-30", "imageUrl": ""},
+  {"productId": 148, "name": "Cake Rusk (200 g)", "categoryId": 5, "barcode": "890123456048", "price": 45.0, "costPrice": 36.0, "stockQuantity": 30, "minimumLevel": 10, "expiryDate": "2027-02-28", "imageUrl": ""},
+  {"productId": 149, "name": "Bananas (1 dozen)", "categoryId": 8, "barcode": "890123456049", "price": 60.0, "costPrice": 46.0, "stockQuantity": 25, "minimumLevel": 10, "expiryDate": "2026-11-28", "imageUrl": ""},
+  {"productId": 150, "name": "Shimla Apples (1 kg)", "categoryId": 8, "barcode": "890123456050", "price": 180.0, "costPrice": 150.0, "stockQuantity": 22, "minimumLevel": 8, "expiryDate": "2026-12-05", "imageUrl": ""},
+  {"productId": 151, "name": "Tomatoes (1 kg)", "categoryId": 8, "barcode": "890123456051", "price": 40.0, "costPrice": 30.0, "stockQuantity": 35, "minimumLevel": 12, "expiryDate": "2026-11-29", "imageUrl": ""},
+  {"productId": 152, "name": "Onions (1 kg)", "categoryId": 8, "barcode": "890123456052", "price": 45.0, "costPrice": 34.0, "stockQuantity": 60, "minimumLevel": 20, "expiryDate": "2026-12-30", "imageUrl": ""},
+  {"productId": 153, "name": "Potatoes (1 kg)", "categoryId": 8, "barcode": "890123456053", "price": 38.0, "costPrice": 28.0, "stockQuantity": 60, "minimumLevel": 20, "expiryDate": "2027-01-10", "imageUrl": ""},
+  {"productId": 154, "name": "Spinach (1 bunch)", "categoryId": 8, "barcode": "890123456054", "price": 25.0, "costPrice": 18.0, "stockQuantity": 20, "minimumLevel": 10, "expiryDate": "2026-11-25", "imageUrl": ""},
+  {"productId": 155, "name": "Carrots (500 g)", "categoryId": 8, "barcode": "890123456055", "price": 30.0, "costPrice": 22.0, "stockQuantity": 25, "minimumLevel": 10, "expiryDate": "2026-12-03", "imageUrl": ""},
+  {"productId": 156, "name": "Pomegranate (1 kg)", "categoryId": 8, "barcode": "890123456056", "price": 190.0, "costPrice": 155.0, "stockQuantity": 15, "minimumLevel": 6, "expiryDate": "2026-12-08", "imageUrl": ""},
+  {"productId": 157, "name": "Rolled Oats (1 kg)", "categoryId": 9, "barcode": "890123456057", "price": 215.0, "costPrice": 178.0, "stockQuantity": 22, "minimumLevel": 8, "expiryDate": "2027-05-31", "imageUrl": ""},
+  {"productId": 158, "name": "Corn Flakes (475 g)", "categoryId": 9, "barcode": "890123456058", "price": 185.0, "costPrice": 152.0, "stockQuantity": 20, "minimumLevel": 8, "expiryDate": "2027-03-31", "imageUrl": ""},
+  {"productId": 159, "name": "Penne Pasta (500 g)", "categoryId": 9, "barcode": "890123456059", "price": 98.0, "costPrice": 78.0, "stockQuantity": 30, "minimumLevel": 10, "expiryDate": "2027-09-30", "imageUrl": ""},
+  {"productId": 160, "name": "Peanut Butter (340 g)", "categoryId": 9, "barcode": "890123456060", "price": 199.0, "costPrice": 163.0, "stockQuantity": 18, "minimumLevel": 6, "expiryDate": "2027-06-30", "imageUrl": ""},
+  {"productId": 161, "name": "Mixed Fruit Jam (500 g)", "categoryId": 9, "barcode": "890123456061", "price": 135.0, "costPrice": 110.0, "stockQuantity": 20, "minimumLevel": 6, "expiryDate": "2027-07-31", "imageUrl": ""},
+  {"productId": 162, "name": "Ready Paneer Butter Masala (300 g)", "categoryId": 9, "barcode": "890123456062", "price": 120.0, "costPrice": 98.0, "stockQuantity": 15, "minimumLevel": 6, "expiryDate": "2027-01-15", "imageUrl": ""}
+];
+
 class RSMSDatabase {
   constructor() {
     this.data = this.load();
@@ -486,6 +543,12 @@ class RSMSDatabase {
     data.users.forEach(u => {
       if (!/^[0-9a-f]{64}$/.test(u.password || '')) u.password = rsmsHash(u.password || '');
     });
+    // Catalogue v2: add the new categories/products once, without touching anything the owner already changed
+    if ((data.catalogVersion || 0) < 2) {
+      EXTRA_CATEGORIES.forEach(c => { if (!data.categories.some(x => x.categoryId === c.categoryId)) data.categories.push({ ...c }); });
+      EXTRA_PRODUCTS.forEach(p => { if (!(data.products || []).some(x => x.productId === p.productId || x.barcode === p.barcode)) data.products.push({ ...p }); });
+      data.catalogVersion = 2;
+    }
     // Pictures: the old web photos did not always match the product, so use the built-in matching picture
     (data.products || []).forEach(p => {
       const u = p.imageUrl || '';

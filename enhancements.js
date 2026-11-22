@@ -112,12 +112,12 @@
     store.set('rsms_theme', theme);
     document.querySelectorAll('.theme-toggle i').forEach((i) => { i.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon'; });
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', theme === 'dark' ? '#0b1220' : '#16a34a');
+    if (meta) meta.setAttribute('content', theme === 'dark' ? '#06080a' : '#e8e6df');
   }
   window.toggleTheme = function () {
     applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
   };
-  applyTheme(store.get('rsms_theme', (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'));
+  applyTheme(store.get('rsms_theme', 'dark'));
 
   /* ================= 4. NEW PAGE: DAY-END CLOSING (permissions and titles) ================= */
   ROLE_PERMISSIONS.admin.push('dayend');
