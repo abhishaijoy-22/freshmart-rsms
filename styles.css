@@ -1370,3 +1370,62 @@ body {
   .trend-chart { gap: 6px; padding: 12px 10px; }
   .trend-value { font-size: 9px; }
 }
+
+/* ================= PRINTING THE CUSTOMER BILL (fixes the empty PDF) ================= */
+@media print {
+  body.print-receipt-mode #printArea { padding: 0 !important; }
+  body.print-receipt-mode #printArea .print-receipt { width: 80mm; margin: 0 auto; }
+  body.print-receipt-mode #printArea .receipt-wrapper {
+    position: static !important; width: 80mm !important; margin: 0 auto !important;
+    padding: 4mm !important; border: none !important; box-shadow: none !important;
+    background: #fff !important; color: #000 !important;
+  }
+  body.print-receipt-mode #printArea .receipt-wrapper * { color: #000 !important; }
+  body.print-receipt-mode #printArea .barcode-svg { width: 100%; height: 40px; }
+}
+
+/* ================= DASHBOARD (new look) ================= */
+.dash-hero {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  padding: 22px 26px; margin-bottom: 20px; border-radius: 16px; color: #fff;
+  background: linear-gradient(120deg, #15803d 0%, #16a34a 55%, #10b981 100%);
+  box-shadow: 0 8px 24px rgba(22, 163, 74, 0.25);
+}
+.dash-hello { font-size: 24px; font-weight: 800; letter-spacing: -0.01em; }
+.dash-date { margin-top: 4px; font-size: 13px; opacity: 0.9; }
+.dash-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.dash-actions .btn { border: none; background: rgba(255, 255, 255, 0.18); color: #fff; backdrop-filter: blur(4px); }
+.dash-actions .btn:hover { background: rgba(255, 255, 255, 0.32); }
+.dash-actions .btn-primary { background: #fff; color: #15803d; font-weight: 700; }
+.dash-actions .btn-primary:hover { background: #f0fdf4; }
+.dash-kpi { border-top: 4px solid var(--border-color); }
+.dash-kpi-green { border-top-color: #16a34a; }
+.dash-kpi-blue { border-top-color: #3b82f6; }
+.dash-kpi-amber { border-top-color: #f59e0b; }
+.dash-kpi-red { border-top-color: #ef4444; }
+.dash-kpi-purple { border-top-color: #8b5cf6; }
+.dash-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.dash-col { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.dash-col .table-card { margin-bottom: 0 !important; }
+.dash-panel { padding: 14px 18px 16px; }
+.dash-empty { color: #94a3b8; font-size: 13px; margin: 4px 0; }
+.dash-empty i { color: #16a34a; margin-right: 6px; }
+.dash-alert-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px 0; border-bottom: 1px dashed var(--border-color); }
+.dash-alert-row:last-child { border-bottom: none; }
+.dash-alert-main { flex: 1; min-width: 0; font-size: 13px; }
+.dash-alert-main strong { display: block; }
+.dash-alert-main span { color: var(--text-muted); font-size: 12px; }
+.dash-chip { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.dash-chip-red { background: #fee2e2; color: #b91c1c; }
+.dash-chip-amber { background: #fef3c7; color: #b45309; }
+.dash-meter { height: 6px; border-radius: 999px; background: #fee2e2; overflow: hidden; margin-top: 5px; }
+.dash-meter i { display: block; height: 100%; border-radius: 999px; background: #ef4444; }
+.dash-meter-green { background: #dcfce7; }
+.dash-meter-green i, .dash-top-row .dash-meter i { background: #16a34a; }
+.dash-top-row { margin-bottom: 13px; font-size: 13px; }
+.dash-top-row:last-child { margin-bottom: 0; }
+.dash-top-row .dash-meter { background: #dcfce7; }
+.dash-top-head { display: flex; justify-content: space-between; gap: 8px; }
+.dash-top-row small { color: var(--text-muted); font-size: 11px; }
+@media (max-width: 1000px) { .dash-grid { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .dash-hero { padding: 16px; } .dash-hello { font-size: 20px; } }

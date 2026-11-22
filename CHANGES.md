@@ -17,3 +17,8 @@
 - Stock Alerts and Expiry tables: the Current Stock and Days Remaining badges were invisible
 - UPI payment: the QR code was only a picture, now it is a real scannable QR with the bill amount
 - Notifications covered the payment window, now they move to the top while a window is open
+
+## Version 3 (fixes)
+- Product pictures: every product now has a built-in picture that matches its name (no web photos that can mismatch). Saved data is fixed automatically.
+- Printing the bill: "Print Receipt" now prints / saves the full bill as PDF (it used to print only "TAX INVOICE").
+- Dashboard: new look with greeting, quick actions for the signed-in role, "Needs attention" list, top products with bars, payment-mode split.

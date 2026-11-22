@@ -8,6 +8,30 @@
 
 const RSMS_DB_KEY = 'RSMS_DATABASE_V1';
 
+// Built-in product pictures: a coloured tile with an emoji that matches the product name.
+// Nothing is downloaded, so the picture always matches the product and also works offline.
+function rsmsProductArt(name) {
+  const n = String(name || '').toLowerCase();
+  const map = [
+    ['cadbury','🍫'],['chocolate','🍫'],['oreo','🍪'],['biscuit','🍪'],['cookie','🍪'],
+    ['ketchup','🍅'],['chip','🥔'],['coca','🥤'],['cola','🥤'],['pepsi','🥤'],['juice','🧃'],
+    ['coffee','☕'],['tea','🍵'],['butter','🧈'],['cheese','🧀'],['paneer','🧀'],
+    ['yogurt','🥣'],['yoghurt','🥣'],['curd','🥣'],['egg','🥚'],['milk','🥛'],
+    ['bread','🍞'],['atta','🌾'],['flour','🌾'],['rice','🍚'],['olive','🫒'],['oil','🫒'],
+    ['soap','🧼'],['handwash','🧴'],['hand wash','🧴'],['shampoo','🧴'],['colgate','🪥'],['toothpaste','🪥'],
+    ['apple','🍎'],['banana','🍌'],['orange','🍊'],['tomato','🍅'],['potato','🥔'],['onion','🧅']
+  ];
+  let icon = '🛒';
+  for (const [k, e] of map) { if (n.includes(k)) { icon = e; break; } }
+  let h = 0; for (const c of n) h = (h * 31 + c.charCodeAt(0)) % 360;
+  const svg = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'>" +
+    "<defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>" +
+    "<stop offset='0' stop-color='hsl(" + h + ",70%,92%)'/><stop offset='1' stop-color='hsl(" + ((h + 40) % 360) + ",65%,82%)'/>" +
+    "</linearGradient></defs><rect width='200' height='200' fill='url(#g)'/>" +
+    "<text x='100' y='108' font-size='92' text-anchor='middle' dominant-baseline='middle'>" + icon + "</text></svg>";
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
+
 // Initial Seed Data with realistic retail items, suppliers, users, and customers
 const DEFAULT_INITIAL_DATA = {
   settings: {
@@ -80,7 +104,7 @@ const DEFAULT_INITIAL_DATA = {
       stockQuantity: 45,
       minimumLevel: 15,
       expiryDate: "2027-06-30",
-      imageUrl: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=500&auto=format&fit=crop&q=60"
+      imageUrl: ""
     },
     {
       productId: 102,
@@ -92,7 +116,7 @@ const DEFAULT_INITIAL_DATA = {
       stockQuantity: 8, // Low stock on purpose (<= 15) to demonstrate TC09
       minimumLevel: 15,
       expiryDate: "2026-11-22", // Expiring soon
-      imageUrl: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=500&auto=format&fit=crop&q=60"
+      imageUrl: ""
     },
     {
       productId: 103,
@@ -104,7 +128,7 @@ const DEFAULT_INITIAL_DATA = {
       stockQuantity: 80,
       minimumLevel: 20,
       expiryDate: "2027-04-15",
-      imageUrl: "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=500&auto=format&fit=crop&q=60"
+      imageUrl: ""
     },
     {
       productId: 104,
@@ -116,7 +140,7 @@ const DEFAULT_INITIAL_DATA = {
       stockQuantity: 5, // Low stock on purpose to demonstrate alerts
       minimumLevel: 10,
       expiryDate: "2026-11-20", // Expiring very soon
-      imageUrl: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop&q=60"
+      imageUrl: ""
     },
     {
       productId: 105,
@@ -128,7 +152,7 @@ const DEFAULT_INITIAL_DATA = {
       stockQuantity: 30,
       minimumLevel: 10,
       expiryDate: "2027-03-31",
-      imageUrl: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=500&auto=format&fit=crop&q=60"
+      imageUrl: ""
     },
     {
       productId: 106,
@@ -140,7 +164,7 @@ const DEFAULT_INITIAL_DATA = {
       stockQuantity: 22,
       minimumLevel: 8,
       expiryDate: "2027-01-15",
-      imageUrl: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=500&auto=format&fit=crop&q=60"
+      imageUrl: ""
     },
     {
       productId: 107,
@@ -152,7 +176,7 @@ const DEFAULT_INITIAL_DATA = {
       stockQuantity: 18,
       minimumLevel: 10,
       expiryDate: "2027-10-30",
-      imageUrl: "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&auto=format&fit=crop&q=60"
+      imageUrl: ""
     },
     {
       productId: 108,
@@ -164,7 +188,7 @@ const DEFAULT_INITIAL_DATA = {
       stockQuantity: 35,
       minimumLevel: 12,
       expiryDate: "2027-08-20",
-      imageUrl: "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=500&auto=format&fit=crop&q=60"
+      imageUrl: ""
     },
     {
       productId: 109,
@@ -176,7 +200,7 @@ const DEFAULT_INITIAL_DATA = {
       stockQuantity: 65,
       minimumLevel: 25,
       expiryDate: "2027-05-10",
-      imageUrl: "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=500&auto=format&fit=crop&q=60"
+      imageUrl: ""
     },
     {
       productId: 110,
@@ -188,7 +212,7 @@ const DEFAULT_INITIAL_DATA = {
       stockQuantity: 40,
       minimumLevel: 15,
       expiryDate: "2027-07-25",
-      imageUrl: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=500&auto=format&fit=crop&q=60"
+      imageUrl: ""
     },
     {
       productId: 111,
@@ -200,7 +224,7 @@ const DEFAULT_INITIAL_DATA = {
       stockQuantity: 50,
       minimumLevel: 20,
       expiryDate: "2028-02-14",
-      imageUrl: "https://images.unsplash.com/photo-1607006314774-60c7f4e91fb6?w=500&auto=format&fit=crop&q=60"
+      imageUrl: ""
     },
     {
       productId: 112,
@@ -212,7 +236,7 @@ const DEFAULT_INITIAL_DATA = {
       stockQuantity: 28,
       minimumLevel: 10,
       expiryDate: "2027-11-15",
-      imageUrl: "https://images.unsplash.com/photo-1559591937-e1115b81a070?w=500&auto=format&fit=crop&q=60"
+      imageUrl: ""
     },
     {
       productId: 113,
@@ -224,7 +248,7 @@ const DEFAULT_INITIAL_DATA = {
       stockQuantity: 14, // Low stock (min level 15)
       minimumLevel: 15,
       expiryDate: "2026-11-28",
-      imageUrl: "https://images.unsplash.com/photo-1506976785307-8732e854ad03?w=500&auto=format&fit=crop&q=60"
+      imageUrl: ""
     },
     {
       productId: 114,
@@ -236,7 +260,7 @@ const DEFAULT_INITIAL_DATA = {
       stockQuantity: 32,
       minimumLevel: 12,
       expiryDate: "2027-09-18",
-      imageUrl: "https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=500&auto=format&fit=crop&q=60"
+      imageUrl: ""
     },
     {
       productId: 115,
@@ -248,7 +272,7 @@ const DEFAULT_INITIAL_DATA = {
       stockQuantity: 24,
       minimumLevel: 10,
       expiryDate: "2028-04-30",
-      imageUrl: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&auto=format&fit=crop&q=60"
+      imageUrl: ""
     },
     {
       productId: 116,
@@ -260,7 +284,7 @@ const DEFAULT_INITIAL_DATA = {
       stockQuantity: 3, // Out of stock / very critical (min level 15)
       minimumLevel: 15,
       expiryDate: "2026-12-05",
-      imageUrl: "https://images.unsplash.com/photo-1613478223719-2ab802602423?w=500&auto=format&fit=crop&q=60"
+      imageUrl: ""
     },
     {
       productId: 117,
@@ -272,7 +296,7 @@ const DEFAULT_INITIAL_DATA = {
       stockQuantity: 12,
       minimumLevel: 5,
       expiryDate: "2027-12-31",
-      imageUrl: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=500&auto=format&fit=crop&q=60"
+      imageUrl: ""
     },
     {
       productId: 118,
@@ -284,7 +308,7 @@ const DEFAULT_INITIAL_DATA = {
       stockQuantity: 10,
       minimumLevel: 12,
       expiryDate: "2026-11-10", // EXPIRED to demonstrate expired warning!
-      imageUrl: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=500&auto=format&fit=crop&q=60"
+      imageUrl: ""
     }
   ],
   customers: [
@@ -461,6 +485,12 @@ class RSMSDatabase {
     data.categories = data.categories || [];
     data.users.forEach(u => {
       if (!/^[0-9a-f]{64}$/.test(u.password || '')) u.password = rsmsHash(u.password || '');
+    });
+    // Pictures: the old web photos did not always match the product, so use the built-in matching picture
+    (data.products || []).forEach(p => {
+      const u = p.imageUrl || '';
+      const isSeed = p.productId >= 101 && p.productId <= 118 && /images\.unsplash\.com/.test(u);
+      if (!u || isSeed || u.indexOf('photo-1542838132') !== -1) p.imageUrl = rsmsProductArt(p.name);
     });
     (data.sales || []).forEach(s => { if (!s.status) s.status = 'Completed'; });
     (data.purchases || []).forEach(p => {
@@ -765,7 +795,7 @@ class RSMSDatabase {
       stockQuantity: parseInt(productData.stockQuantity) || 0,
       minimumLevel: parseInt(productData.minimumLevel) || 10,
       expiryDate: productData.expiryDate || "2027-12-31",
-      imageUrl: productData.imageUrl || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&auto=format&fit=crop&q=60"
+      imageUrl: productData.imageUrl || rsmsProductArt(productData.name)
     };
 
     this.data.products.push(newProduct);

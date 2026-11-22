@@ -227,145 +227,167 @@ function renderDashboard() {
   const container = document.getElementById('view-dashboard');
   if (!container) return;
 
-  const report = window.rsmsDB.getSalesReport({ period: 'today' });
-  const allSales = window.rsmsDB.getSales();
-  const lowStock = window.rsmsDB.getLowStockProducts();
-  const expiring = window.rsmsDB.getExpiringProducts(30);
-  const settings = window.rsmsDB.getSettings();
+  const db = window.rsmsDB;
+  const report = db.getSalesReport({ period: 'today' });
+  const allSales = db.getSales();
+  const lowStock = db.getLowStockProducts();
+  const expiring = db.getExpiringProducts(14).sort((a, b) => a.daysRemaining - b.daysRemaining);
+  const settings = db.getSettings();
+  const cur = settings.currency;
+  const products = db.getProducts();
+  const totalStockUnits = products.reduce((acc, p) => acc + p.stockQuantity, 0);
 
-  const totalStockUnits = window.rsmsDB.getProducts().reduce((acc, p) => acc + p.stockQuantity, 0);
+  // Who is signed in, and what they are allowed to open
+  const role = state.currentUser ? state.currentUser.role : '';
+  const can = view => (ROLE_PERMISSIONS[role] || []).includes(view);
+  const firstName = state.currentUser ? (state.currentUser.name.split(' ')[0] === 'System' ? state.currentUser.name : state.currentUser.name.split(' ')[0]) : '';
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const todayText = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  // Today's sales split by payment mode
+  const pad = n => String(n).padStart(2, '0');
+  const t = new Date();
+  const todayKey = `${t.getFullYear()}-${pad(t.getMonth() + 1)}-${pad(t.getDate())}`;
+  const byMode = {};
+  allSales.filter(s => s.status !== 'Cancelled' && String(s.date).startsWith(todayKey))
+    .forEach(s => { byMode[s.paymentMode] = (byMode[s.paymentMode] || 0) + db.netAmount(s); });
+  const modeTotal = Object.values(byMode).reduce((a, b) => a + b, 0);
+  const modeRows = Object.entries(byMode).sort((a, b) => b[1] - a[1]);
+
+  const topProducts = report.topSellingProducts.slice(0, 5);
+  const topMax = Math.max(...topProducts.map(p => p.revenue), 1);
+
+  const actions = [
+    can('pos') && `<button class="btn btn-primary" onclick="navigateTo('pos')"><i class="fas fa-cash-register"></i> New bill</button>`,
+    can('inventory') && `<button class="btn btn-secondary" onclick="openReceiveStockModal()"><i class="fas fa-truck-loading"></i> Receive stock</button>`,
+    can('products') && `<button class="btn btn-secondary" onclick="openAddProductModal()"><i class="fas fa-plus"></i> Add product</button>`,
+    can('reports') && `<button class="btn btn-secondary" onclick="navigateTo('reports')"><i class="fas fa-chart-line"></i> Reports</button>`
+  ].filter(Boolean).join('');
+
+  const attention = [
+    ...lowStock.slice(0, 5).map(p => `
+      <div class="dash-alert-row">
+        <div class="dash-alert-main">
+          <strong>${esc(p.name)}</strong>
+          <span>${p.stockQuantity} left &middot; reorder at ${p.minimumLevel}</span>
+          <div class="dash-meter"><i style="width:${Math.min(100, Math.round((p.stockQuantity / Math.max(p.minimumLevel, 1)) * 100))}%"></i></div>
+        </div>
+        <span class="dash-chip dash-chip-red">Low stock</span>
+      </div>`),
+    ...expiring.slice(0, 4).map(p => `
+      <div class="dash-alert-row">
+        <div class="dash-alert-main"><strong>${esc(p.name)}</strong>
+          <span>${p.isExpired ? 'Expired' : 'Expires in ' + p.daysRemaining + ' day(s)'} &middot; ${p.stockQuantity} in stock</span></div>
+        <span class="dash-chip dash-chip-amber">${p.isExpired ? 'Expired' : 'Expiring'}</span>
+      </div>`)
+  ].join('');
 
   container.innerHTML = `
-    <!-- Low Stock Alert Banner if items are low -->
-    ${lowStock.length > 0 ? `
-      <div class="alert-banner">
-        <div class="alert-content">
-          <i class="fas fa-exclamation-triangle"></i>
-          <div>
-            <div class="alert-title">Low Stock Alert: ${lowStock.length} Product(s) Below Minimum Reorder Level</div>
-            <div class="alert-desc">${lowStock.map(p => `${p.name} (Stock: ${p.stockQuantity}/${p.minimumLevel})`).slice(0, 3).join(', ')}${lowStock.length > 3 ? ` and ${lowStock.length - 3} more...` : ''}</div>
-          </div>
-        </div>
-        <button class="btn btn-danger btn-sm" onclick="navigateTo('inventory')">
-          <i class="fas fa-box-open"></i> Restock Now
-        </button>
+    <!-- Greeting + quick actions -->
+    <div class="dash-hero">
+      <div>
+        <div class="dash-hello">${greeting}${firstName ? ', ' + esc(firstName) : ''}</div>
+        <div class="dash-date"><i class="far fa-calendar"></i> ${todayText} &middot; ${esc(settings.storeName)}</div>
       </div>
-    ` : ''}
+      <div class="dash-actions">${actions}</div>
+    </div>
 
-    <!-- KPI Statistics Grid -->
+    <!-- KPI cards -->
     <div class="stats-grid">
-      <div class="stat-card">
+      <div class="stat-card dash-kpi dash-kpi-green">
         <div class="stat-content">
-          <h3>Today's Sales</h3>
-          <div class="stat-number">${settings.currency}${report.totalRevenue.toFixed(2)}</div>
-          <div class="stat-trend trend-up"><i class="fas fa-receipt"></i> ${report.totalBills} bill(s) made today</div>
+          <h3>Today's sales</h3>
+          <div class="stat-number">${cur}${report.totalRevenue.toFixed(2)}</div>
+          <div class="stat-trend trend-up"><i class="fas fa-receipt"></i> ${report.totalBills} bill(s) today</div>
         </div>
         <div class="stat-icon stat-icon-green"><i class="fas fa-cash-register"></i></div>
       </div>
-
-      <div class="stat-card">
+      <div class="stat-card dash-kpi dash-kpi-blue">
         <div class="stat-content">
-          <h3>Total Products</h3>
-          <div class="stat-number">${window.rsmsDB.getProducts().length}</div>
+          <h3>Products</h3>
+          <div class="stat-number">${products.length}</div>
           <div class="stat-trend"><i class="fas fa-cubes"></i> ${totalStockUnits} units in stock</div>
         </div>
         <div class="stat-icon stat-icon-blue"><i class="fas fa-boxes"></i></div>
       </div>
-
-      <div class="stat-card">
+      <div class="stat-card dash-kpi ${lowStock.length ? 'dash-kpi-red' : 'dash-kpi-amber'}" ${can('inventory') ? `onclick="navigateTo('inventory')" style="cursor:pointer"` : ''}>
         <div class="stat-content">
-          <h3>Low Stock Items</h3>
-          <div class="stat-number" style="color: ${lowStock.length > 0 ? '#ef4444' : '#10b981'}">${lowStock.length}</div>
-          <div class="stat-trend ${lowStock.length > 0 ? 'trend-down' : 'trend-up'}">
-            <i class="fas fa-bell"></i> ${lowStock.length > 0 ? 'Reorder needed' : 'Stock levels healthy'}
-          </div>
+          <h3>Low stock</h3>
+          <div class="stat-number" style="color:${lowStock.length ? '#ef4444' : '#10b981'}">${lowStock.length}</div>
+          <div class="stat-trend ${lowStock.length ? 'trend-down' : 'trend-up'}"><i class="fas fa-bell"></i> ${lowStock.length ? 'Reorder needed' : 'All stock levels healthy'}</div>
         </div>
         <div class="stat-icon stat-icon-amber"><i class="fas fa-exclamation-circle"></i></div>
       </div>
-
-      <div class="stat-card">
+      <div class="stat-card dash-kpi dash-kpi-purple">
         <div class="stat-content">
-          <h3>Inventory Value</h3>
-          <div class="stat-number">${settings.currency}${report.inventoryValuation.retailValue.toFixed(0)}</div>
-          <div class="stat-trend trend-up"><i class="fas fa-coins"></i> Potential Profit: ${settings.currency}${report.inventoryValuation.potentialProfit.toFixed(0)}</div>
+          <h3>Inventory value</h3>
+          <div class="stat-number">${cur}${report.inventoryValuation.retailValue.toFixed(0)}</div>
+          <div class="stat-trend trend-up"><i class="fas fa-coins"></i> Profit potential ${cur}${report.inventoryValuation.potentialProfit.toFixed(0)}</div>
         </div>
         <div class="stat-icon stat-icon-purple"><i class="fas fa-hand-holding-usd"></i></div>
       </div>
     </div>
 
-    <!-- Quick Actions Row -->
-    <div style="display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;">
-      <button class="btn btn-primary" onclick="navigateTo('pos')">
-        <i class="fas fa-plus-circle"></i> Create New Bill (POS)
-      </button>
-      <button class="btn btn-success" onclick="openReceiveStockModal()">
-        <i class="fas fa-truck-loading"></i> Receive Stock from Supplier
-      </button>
-      <button class="btn btn-secondary" onclick="openAddProductModal()">
-        <i class="fas fa-box-tissue"></i> Add New Product
-      </button>
-      <button class="btn btn-secondary" onclick="navigateTo('reports')">
-        <i class="fas fa-chart-line"></i> View Sales Reports
-      </button>
-    </div>
+    <div class="dash-grid">
+      <div class="dash-col">
+        ${buildSalesTrendHTML()}
 
-    ${buildSalesTrendHTML()}
-
-    <!-- Recent Sales Table & Top Products -->
-    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
-      <div class="table-card">
-        <div class="table-header">
-          <h2><i class="fas fa-history text-primary"></i> Recent Completed Bills</h2>
-          <button class="btn btn-secondary btn-sm" onclick="navigateTo('pos')">Start Billing</button>
-        </div>
-        <div class="table-responsive">
-          <table class="custom-table">
-            <thead>
-              <tr>
-                <th>Bill No</th>
-                <th>Date & Time</th>
-                <th>Customer</th>
-                <th>Payment</th>
-                <th>Total</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${allSales.slice(0, 5).map(sale => `
-                <tr>
-                  <td><strong>${sale.billNo}</strong>${sale.status === 'Cancelled' ? ' <span class="stock-tag stock-tag-out">Cancelled</span>' : ''}</td>
-                  <td>${sale.date}</td>
-                  <td>${sale.customerName}</td>
-                  <td><span class="role-badge-pill role-badge-cashier">${sale.paymentMode}</span></td>
-                  <td><strong>${settings.currency}${sale.totalAmount.toFixed(2)}</strong></td>
-                  <td>
-                    <button class="btn btn-secondary btn-sm" onclick="viewReceipt('${sale.billNo}')">
-                      <i class="fas fa-receipt"></i> Bill
-                    </button>
-                  </td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
+        <div class="table-card">
+          <div class="table-header">
+            <h2><i class="fas fa-history text-primary"></i> Recent bills</h2>
+            ${can('sales') ? `<button class="btn btn-secondary btn-sm" onclick="navigateTo('sales')">View all</button>` : ''}
+          </div>
+          <div class="table-responsive">
+            <table class="custom-table">
+              <thead><tr><th>Bill no</th><th>Date &amp; time</th><th>Customer</th><th>Payment</th><th>Total</th><th></th></tr></thead>
+              <tbody>
+                ${allSales.length === 0 ? '<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:20px;">No bills yet. Create the first one from POS Billing.</td></tr>' : ''}
+                ${allSales.slice(0, 6).map(sale => `
+                  <tr>
+                    <td><strong>${sale.billNo}</strong>${sale.status === 'Cancelled' ? ' <span class="stock-tag stock-tag-out">Cancelled</span>' : ''}</td>
+                    <td>${sale.date}</td>
+                    <td>${esc(sale.customerName)}</td>
+                    <td><span class="role-badge-pill role-badge-cashier">${sale.paymentMode}</span></td>
+                    <td><strong>${cur}${sale.totalAmount.toFixed(2)}</strong></td>
+                    <td><button class="btn btn-secondary btn-sm" onclick="viewReceipt('${sale.billNo}')"><i class="fas fa-receipt"></i> Bill</button></td>
+                  </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- Top Selling Products -->
-      <div class="table-card">
-        <div class="table-header">
-          <h2><i class="fas fa-crown text-warning"></i> Top Products</h2>
+      <div class="dash-col">
+        <div class="table-card">
+          <div class="table-header"><h2><i class="fas fa-bell text-warning"></i> Needs attention</h2>
+            ${attention ? `<span class="dash-chip dash-chip-red">${lowStock.length + expiring.length}</span>` : ''}</div>
+          <div class="dash-panel">${attention || '<p class="dash-empty"><i class="fas fa-circle-check"></i> Nothing needs attention right now.</p>'}</div>
         </div>
-        <div style="padding: 16px;">
-          ${report.topSellingProducts.length === 0 ? '<p style="color:#94a3b8; font-size:13px;">No sales recorded yet.</p>' : ''}
-          ${report.topSellingProducts.slice(0, 5).map((p, idx) => `
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px dashed #e2e8f0;">
-              <div>
-                <div style="font-size: 13px; font-weight: 600; color: #1e293b;">${idx + 1}. ${p.name}</div>
-                <div style="font-size: 11px; color: #64748b;">${p.quantity} units sold</div>
-              </div>
-              <div style="font-weight: 700; font-size: 13px; color: #10b981;">${settings.currency}${p.revenue.toFixed(2)}</div>
-            </div>
-          `).join('')}
+
+        <div class="table-card">
+          <div class="table-header"><h2><i class="fas fa-crown text-warning"></i> Top products</h2></div>
+          <div class="dash-panel">
+            ${topProducts.length === 0 ? '<p class="dash-empty">No sales recorded yet.</p>' : ''}
+            ${topProducts.map((p, i) => `
+              <div class="dash-top-row">
+                <div class="dash-top-head"><span><b>${i + 1}.</b> ${esc(p.name)}</span><strong>${cur}${p.revenue.toFixed(2)}</strong></div>
+                <div class="dash-meter dash-meter-green"><i style="width:${Math.round((p.revenue / topMax) * 100)}%"></i></div>
+                <small>${p.quantity} units sold</small>
+              </div>`).join('')}
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-header"><h2><i class="fas fa-wallet text-primary"></i> Today by payment mode</h2></div>
+          <div class="dash-panel">
+            ${modeRows.length === 0 ? '<p class="dash-empty">No payments yet today.</p>' : ''}
+            ${modeRows.map(([m, v]) => `
+              <div class="dash-top-row">
+                <div class="dash-top-head"><span>${m}</span><strong>${cur}${v.toFixed(2)}</strong></div>
+                <div class="dash-meter"><i style="width:${Math.round((v / Math.max(modeTotal, 1)) * 100)}%"></i></div>
+              </div>`).join('')}
+          </div>
         </div>
       </div>
     </div>
@@ -545,7 +567,7 @@ function renderPOSProducts() {
     return `
       <div class="product-card" onclick="addToCart(${p.productId})">
         <div class="product-img-wrap">
-          <img src="${p.imageUrl}" alt="${p.name}" class="product-img" onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&auto=format&fit=crop&q=60'">
+          <img src="${p.imageUrl}" alt="${p.name}" class="product-img" onerror="this.onerror=null;this.src=rsmsProductArt(this.alt)">
           <span class="stock-tag ${stockClass}">${stockLabel}</span>
         </div>
         <div class="product-details">
@@ -974,7 +996,21 @@ function viewReceipt(billNo) {
 }
 
 function printReceipt() {
+  // The receipt sits inside a pop-up window that the browser clips when printing (this gave an empty page).
+  // So the bill is copied into the plain print area first, and that copy is printed / saved as PDF.
+  const bill = document.getElementById('printableThermalReceipt');
+  const area = document.getElementById('printArea');
+  if (!bill || !area) { window.print(); return; }
+  area.innerHTML = '<div class="print-receipt">' + bill.outerHTML.replace('id="printableThermalReceipt"', '') + '</div>';
+  document.body.classList.add('print-area-mode', 'print-receipt-mode');
+  const done = () => {
+    document.body.classList.remove('print-area-mode', 'print-receipt-mode');
+    area.innerHTML = '';
+    window.removeEventListener('afterprint', done);
+  };
+  window.addEventListener('afterprint', done);
   window.print();
+  setTimeout(() => { if (document.body.classList.contains('print-receipt-mode')) done(); }, 1500);
 }
 
 // ================= 3. PRODUCTS & CATALOG MANAGEMENT =================
@@ -1067,7 +1103,7 @@ function renderProductsRows(products, categories, settings, isManagerOrAdmin) {
       <tr data-id="${p.productId}">
         <td>
           <div style="display: flex; align-items: center;">
-            <img src="${p.imageUrl}" alt="${p.name}" class="table-prod-thumb" onerror="this.src='https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&auto=format&fit=crop&q=60'">
+            <img src="${p.imageUrl}" alt="${p.name}" class="table-prod-thumb" onerror="this.onerror=null;this.src=rsmsProductArt(this.alt)">
             <div>
               <div style="font-weight: 600; color: #0f172a;">${p.name}</div>
               <div style="font-size: 11px; color: #94a3b8;">ID: #${p.productId}</div>
@@ -1143,7 +1179,7 @@ function openAddProductModal() {
   document.getElementById('productFormStock').value = '25';
   document.getElementById('productFormMinLevel').value = '10';
   document.getElementById('productFormExpiry').value = '2027-12-31';
-  document.getElementById('productFormImage').value = 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&auto=format&fit=crop&q=60';
+  document.getElementById('productFormImage').value = '';
   document.getElementById('productFormPrice').disabled = false;
   document.getElementById('productFormCostPrice').disabled = false;
 
@@ -1180,7 +1216,7 @@ function openEditProductModal(productId) {
   document.getElementById('productFormStock').value = product.stockQuantity;
   document.getElementById('productFormMinLevel').value = product.minimumLevel;
   document.getElementById('productFormExpiry').value = product.expiryDate || '';
-  document.getElementById('productFormImage').value = product.imageUrl;
+  document.getElementById('productFormImage').value = (product.imageUrl || '').startsWith('data:') ? '' : product.imageUrl;
   // Only managers and admins may change prices (Section 2.3 of the report)
   document.getElementById('productFormPrice').disabled = !isManagerOrAdmin;
   document.getElementById('productFormCostPrice').disabled = !isManagerOrAdmin;
@@ -1204,7 +1240,7 @@ function saveProductForm() {
     const stockQuantity = parseInt(document.getElementById('productFormStock').value);
     const minimumLevel = parseInt(document.getElementById('productFormMinLevel').value);
     const expiryDate = document.getElementById('productFormExpiry').value;
-    const imageUrl = document.getElementById('productFormImage').value.trim();
+    const imageUrl = document.getElementById('productFormImage').value.trim() || rsmsProductArt(document.getElementById('productFormName').value);
 
     if (!name || isNaN(price)) {
       showToast("Please provide product name and valid retail price.", "warning");
@@ -1309,7 +1345,7 @@ function renderInventoryView() {
                 <tr>
                   <td>
                     <div style="display:flex; align-items:center;">
-                      <img src="${p.imageUrl}" alt="${p.name}" class="table-prod-thumb">
+                      <img src="${p.imageUrl}" alt="${p.name}" class="table-prod-thumb" onerror="this.onerror=null;this.src=rsmsProductArt(this.alt)">
                       <div>
                         <strong>${p.name}</strong>
                         <div style="font-size: 11px; color:#64748b;">${p.barcode}</div>
@@ -1366,7 +1402,7 @@ function renderInventoryView() {
               <tr>
                 <td>
                   <div style="display:flex; align-items:center;">
-                    <img src="${p.imageUrl}" alt="${p.name}" class="table-prod-thumb">
+                    <img src="${p.imageUrl}" alt="${p.name}" class="table-prod-thumb" onerror="this.onerror=null;this.src=rsmsProductArt(this.alt)">
                     <div>
                       <strong>${p.name}</strong>
                       <div style="font-size: 11px; color:#64748b;">Barcode: ${p.barcode}</div>
