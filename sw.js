@@ -1,7 +1,7 @@
 /* FreshMart RSMS service worker: lets the app open without internet.
    Our own files: network first, saved copy when offline (so updates always arrive).
    Other files (icons font, PDF library): saved copy first, refreshed in the background. */
-const CACHE = 'rsms-v9';
+const CACHE = 'rsms-v10';
 const SHELL = ['./', 'index.html', 'styles.css', 'enhancements.css', 'theme.css', 'cinematic.css', 'photos.css', 'refine.css', 'database.js', 'app.js', 'enhancements.js', 'welcome.js', 'polish.js', 'photos.js', 'qrcode.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', (event) => {

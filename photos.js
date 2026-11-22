@@ -83,17 +83,29 @@
   }
 
   /* ---------- 4. Product cards and product tables ---------- */
+  // Real photos live in photos/products/<name>.jpg (see PHOTO_LIST.md for every file name).
+  // Order tried: your own file (.jpg, .png, .webp) -> Unsplash id from the table above -> built-in picture.
+  const slug = (n) => String(n || '').toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  const EXT = ['jpg', 'png', 'webp'];
+
   function productPhotos() {
-    if (!Object.keys(PHOTOS.products).length) return;
     document.querySelectorAll('img.product-img, img.table-prod-thumb').forEach((el) => {
       if (el.dataset.ph) return;
       el.dataset.ph = '1';
-      const id = PHOTOS.products[(el.alt || '').trim().toLowerCase()];
-      if (!id) return;
+      const name = (el.alt || '').trim();
+      if (!name) return;
       const original = el.src;
-      el.onerror = () => { el.onerror = null; el.src = original; el.classList.remove('ph-photo'); };
-      el.src = url(id, 400);
-      el.classList.add('ph-photo');
+      const unsplash = PHOTOS.products[name.toLowerCase()];
+      const tries = EXT.map((e) => `photos/products/${slug(name)}.${e}`);
+      if (unsplash) tries.push(url(unsplash, 400));
+      let i = 0;
+      const next = () => {
+        if (i >= tries.length) { el.onerror = null; el.src = original; el.classList.remove('ph-photo'); return; }
+        el.src = tries[i++];
+      };
+      el.onerror = next;
+      el.onload = () => { if (el.src !== original) el.classList.add('ph-photo'); };
+      next();
     });
   }
 
