@@ -1,0 +1,81 @@
+/* FreshMart RSMS — Nolan theme (drop-in override)
+   Add as the LAST stylesheet in index.html:
+   <link rel="stylesheet" href="nolan-theme.css">
+   Palette: black / film white / steel / ember orange (same as the presentation) */
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600&display=swap');
+
+:root{
+  --n-black:#000; --n-card:#0f1317; --n-line:#2a333b;
+  --n-white:#f2f0ea; --n-steel:#9aa7b2; --n-ember:#e4572e;
+  --n-head:'Gill Sans','Gill Sans MT','Josefin Sans',Calibri,sans-serif;
+  /* common variable names, in case the site uses them */
+  --primary:#e4572e; --primary-color:#e4572e; --accent:#e4572e;
+  --bg:#000; --bg-color:#000; --surface:#0f1317; --card-bg:#0f1317;
+  --text:#f2f0ea; --text-color:#f2f0ea; --border:#2a333b; --border-color:#2a333b;
+}
+
+html,body{background:var(--n-black)!important;color:var(--n-white)!important;
+  font-family:Inter,Calibri,system-ui,sans-serif;letter-spacing:.01em}
+
+/* Titles: wide-tracked caps, like a film poster */
+h1,h2,h3,h4,.logo,[class*="brand"],[class*="title"]{
+  font-family:var(--n-head)!important;text-transform:uppercase;
+  letter-spacing:.14em;font-weight:400;color:var(--n-white)}
+h1{letter-spacing:.2em}
+h3,h4{font-size:1rem}
+
+/* Surfaces: sidebar, header, cards, panels, modals */
+aside,nav,header,footer,[class*="sidebar"],[class*="card"],[class*="panel"],
+[class*="modal"],[class*="widget"],[class*="stat"],[class*="box"],
+[class*="login"],[class*="auth"],.dropdown,details{
+  background:var(--n-card)!important;color:var(--n-white)!important;
+  border-color:var(--n-line)!important;box-shadow:none!important;border-radius:2px!important}
+[class*="overlay"],[class*="backdrop"]{background:rgba(0,0,0,.85)!important}
+main,[class*="content"],[class*="main"],section{background:transparent!important}
+
+/* Nav items */
+[class*="nav"] a,[class*="menu"] a,[class*="nav"] li{color:var(--n-steel)!important;
+  text-transform:uppercase;letter-spacing:.1em;font-size:.8rem}
+[class*="nav"] .active,[class*="nav"] a:hover,[class*="menu"] a:hover,[class*="active"]{
+  color:var(--n-ember)!important;background:rgba(228,87,46,.08)!important}
+
+/* Buttons */
+button,.btn,[class*="btn"],input[type=submit]{
+  background:transparent!important;color:var(--n-white)!important;
+  border:1px solid var(--n-steel)!important;border-radius:0!important;
+  text-transform:uppercase;letter-spacing:.14em;font-size:.78rem;
+  transition:all .25s ease}
+button:hover,.btn:hover,[class*="btn"]:hover{
+  background:var(--n-ember)!important;border-color:var(--n-ember)!important;color:#000!important}
+[class*="primary"],button[type=submit]{border-color:var(--n-ember)!important;color:var(--n-ember)!important}
+[class*="close"],.modal button:first-child{border:0!important}
+
+/* Forms */
+input,select,textarea{background:#000!important;color:var(--n-white)!important;
+  border:1px solid var(--n-line)!important;border-radius:0!important}
+input:focus,select:focus,textarea:focus{outline:none!important;border-color:var(--n-ember)!important;
+  box-shadow:0 0 0 1px var(--n-ember)!important}
+::placeholder{color:#5c6b77!important}
+label{color:var(--n-steel)!important;text-transform:uppercase;letter-spacing:.1em;font-size:.72rem}
+
+/* Tables */
+table{border-collapse:collapse;width:100%;background:transparent!important}
+th{background:#1a2128!important;color:var(--n-ember)!important;text-transform:uppercase;
+  letter-spacing:.1em;font-size:.72rem;border-bottom:1px solid var(--n-line)!important}
+td{border-bottom:1px solid var(--n-line)!important;color:var(--n-white)!important}
+tr:hover td{background:rgba(255,255,255,.03)!important}
+
+/* Links, muted text, big numbers */
+a{color:var(--n-ember)}
+small,.muted,[class*="muted"],[class*="sub"]{color:var(--n-steel)!important}
+[class*="value"],[class*="amount"],[class*="total"]{font-family:var(--n-head)}
+kbd{background:#000;border:1px solid var(--n-steel);color:var(--n-steel);border-radius:0}
+
+/* Quiet scrollbars, orange selection */
+::selection{background:var(--n-ember);color:#000}
+*{scrollbar-width:thin;scrollbar-color:#2a333b #000}
+
+/* Login hero tagline */
+.hero h1::after,[class*="hero"] h2::after{content:"Time is the one thing a shop can’t restock.";
+  display:block;margin-top:1rem;font:italic 300 1rem var(--n-head);
+  text-transform:none;letter-spacing:.04em;color:var(--n-ember)}
