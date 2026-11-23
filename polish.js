@@ -4,9 +4,12 @@
   const dash = document.getElementById('view-dashboard');
   if (dash && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     new MutationObserver(() => {
+      // Animate each number once, only when it is a freshly drawn element. Never restart on other changes.
       dash.querySelectorAll('.stat-number').forEach(el => {
+        if (el.dataset.cu) return;
         const m = el.textContent.trim().match(/^(\u20B9)?([\d,]+(?:\.\d+)?)$/);
         if (!m) return;
+        el.dataset.cu = '1';
         const end = parseFloat(m[2].replace(/,/g, '')), dec = (m[2].split('.')[1] || '').length, pre = m[1] || '';
         if (!end) return;
         const t0 = performance.now(), dur = 900;

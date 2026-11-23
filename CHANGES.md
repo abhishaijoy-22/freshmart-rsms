@@ -31,3 +31,4 @@
 
 - Colour + photos update: new teal accent colour (replaces ember orange) in all CSS/JS. photos.js now loads real product photos from photos/products/ (names in PHOTO_LIST.md) and falls back to the built-in picture. sw.js cache bumped to rsms-v10.
 - Fresh green palette: accent changed from teal to leaf green, dark and light surfaces tinted green. sw.js cache is rsms-v11.
+- Dashboard shaking fix: removed the remote Unsplash banner image (it failed, removed itself, and was re-added in an endless loop, restarting the number count-up each time). Banner is now pure CSS. Count-up animates each number once. Numbers use fixed-width digits. photos.js observer debounced. sw.js cache is rsms-v12.

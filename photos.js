@@ -18,12 +18,7 @@
       'bakery & fresh': 'PO2GsmeN8hU',
       'fruits & vegetables': 'GPxxXAbzsXU'
     },
-    products: {                           // full product name (lower case) -> photo id
-      'milk (1 l)': '5SN5N5-JM3c',
-      'whole wheat bread (400g)': 'nymRFkQD8Og',
-      'multigrain bread (400 g)': '6D9C0lEkYVk',
-      'pav buns (6 pack)': 'q-PulMeewiw'
-    }
+    products: {}                          // real photos live in photos/products/
   };
 
   const url = (id, w) => `https://unsplash.com/photos/${id}/download?w=${w || 1000}`;
@@ -42,24 +37,20 @@
     img.src = url(PHOTOS.login, 1600);
   }
 
-  /* ---------- 2. Dashboard banner ---------- */
+  /* ---------- 2. Dashboard banner (pure CSS, no remote image, so it can never fail or flicker) ---------- */
   function dashboardBanner() {
     const view = document.getElementById('view-dashboard');
-    if (!view || !PHOTOS.banner || document.getElementById('phBanner')) return;
+    if (!view || document.getElementById('phBanner')) return;
     const grid = view.querySelector('.stats-grid');
     if (!grid) return;
     const s = (db() && db().getSettings()) || {};
     const box = document.createElement('div');
     box.className = 'ph-banner'; box.id = 'phBanner';
-    const img = document.createElement('img');
-    img.alt = ''; img.loading = 'lazy'; img.src = url(PHOTOS.banner, 1400);
-    img.onerror = () => box.remove();
     const text = document.createElement('div'); text.className = 'ph-banner-text';
     const h = document.createElement('strong'); h.textContent = s.storeName || 'FreshMart';
     const t = document.createElement('span'); t.textContent = s.tagline || '';
     text.append(h, t);
-    const credit = document.createElement('div'); credit.className = 'ph-credit'; credit.textContent = 'Photo: Unsplash';
-    box.append(img, text, credit);
+    box.append(text);
     grid.parentNode.insertBefore(box, grid);
   }
 
@@ -115,7 +106,7 @@
   let queued = false;
   new MutationObserver(() => {
     if (queued) return; queued = true;
-    requestAnimationFrame(() => { queued = false; run(); });
+    setTimeout(() => { queued = false; run(); }, 150);
   }).observe(document.body, { childList: true, subtree: true });
   run();
 })();

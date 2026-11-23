@@ -12,15 +12,20 @@
 
 /* Dashboard banner */
 .ph-banner {
-  position: relative; height: 170px; margin-bottom: 22px; overflow: hidden;
-  border: 1px solid var(--line, rgba(255,255,255,.08)); border-radius: 6px; background: #0b0f12;
+  position: relative; height: 120px; margin-bottom: 22px; overflow: hidden; flex: none;
+  border: 1px solid var(--line, rgba(255,255,255,.08)); border-radius: 6px;
+  background: radial-gradient(120% 140% at 85% 0%, rgba(34,197,94,.35) 0%, rgba(34,197,94,0) 60%), linear-gradient(135deg, #0f2a1b 0%, #0c1511 70%);
 }
-.ph-banner img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(.7) saturate(1.05); }
-.ph-banner::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(6,8,10,.88), rgba(6,8,10,.15) 70%); }
 .ph-banner-text { position: absolute; z-index: 1; left: 28px; bottom: 22px; right: 28px; color: #f2f0ea; }
 .ph-banner-text strong { display: block; font: 300 24px/1.2 var(--font-display, 'Josefin Sans', sans-serif); letter-spacing: .12em; text-transform: uppercase; }
 .ph-banner-text span { display: block; margin-top: 6px; font-size: 13px; letter-spacing: .06em; color: #c5ccd2; }
-.ph-credit { position: absolute; z-index: 1; right: 10px; top: 8px; font-size: 10px; letter-spacing: .08em; color: rgba(255,255,255,.55); }
+:root[data-theme="light"] .ph-banner { background: radial-gradient(120% 140% at 85% 0%, rgba(34,197,94,.30) 0%, rgba(34,197,94,0) 60%), linear-gradient(135deg, #dff1e5 0%, #f7fbf8 70%); }
+:root[data-theme="light"] .ph-banner-text { color: #14301f; }
+:root[data-theme="light"] .ph-banner-text span { color: #4f6b5a; }
+
+/* Dashboard stability: numbers keep a fixed width while they count up, and the browser never re-anchors the scroll */
+.stat-number { font-variant-numeric: tabular-nums; min-width: 4ch; }
+#view-dashboard { overflow-anchor: none; }
 
 /* Categories table: photo thumbnail in place of the icon square */
 .ph-cat-thumb { width: 44px; height: 44px; flex: 0 0 44px; object-fit: cover; border-radius: 2px; border: 1px solid var(--border-color, #1e2e25); }
@@ -30,4 +35,4 @@
 :root[data-theme="light"] .product-img.ph-photo, :root[data-theme="light"] .table-prod-thumb.ph-photo { filter: none; }
 .product-img.ph-photo, .table-prod-thumb.ph-photo { object-fit: cover; }
 
-@media (max-width: 640px) { .ph-banner { height: 130px; } .ph-banner-text strong { font-size: 18px; } }
+@media (max-width: 640px) { .ph-banner { height: 100px; } .ph-banner-text strong { font-size: 18px; } }
